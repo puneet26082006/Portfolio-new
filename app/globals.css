@@ -1,26 +1,245 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+  Puneet Saxena — Portfolio design system
+  Rose/amber dark theme inspired by awrs.me.
+  Tailwind v4: theme tokens live in @theme so utilities like
+  bg-background / text-primary / border-border are generated.
+*/
+
+@theme {
+  /* Surfaces */
+  --color-background: #08080a;
+  --color-background-soft: #0e0e11;
+  --color-card: #141418;
+  --color-card-soft: #1b1b21;
+  --color-border: #26262d;
+  --color-border-soft: #1e1e24;
+
+  /* Text */
+  --color-foreground: #ededed;
+  --color-muted: #a1a1aa;
+  --color-muted-foreground: #a1a1aa;
+  --color-faint: #6b6b74;
+
+  /* Brand — rose */
+  --color-primary: #d4547e;
+  --color-primary-soft: #e07a9c;
+  --color-primary-bright: #f5b8cc;
+  --color-primary-deep: #a83d62;
+
+  /* Brand — amber accent */
+  --color-accent: #f59e0b;
+  --color-accent-soft: #fbbf24;
+
+  /* Fonts (wired to next/font vars in layout.tsx) */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-playfair), Georgia, "Times New Roman", serif;
+
+  /* Animation timing */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Rotating angle used by the conic-gradient glow borders */
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: var(--color-border);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* Ambient page background: soft rose/amber aurora + subtle grid */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(60rem 40rem at 15% -10%, rgba(212, 84, 126, 0.16), transparent 60%),
+    radial-gradient(50rem 40rem at 100% 10%, rgba(245, 158, 11, 0.10), transparent 55%),
+    radial-gradient(40rem 40rem at 50% 120%, rgba(212, 84, 126, 0.10), transparent 60%);
+  pointer-events: none;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 100% 70% at 50% 0%, #000 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 100% 70% at 50% 0%, #000 40%, transparent 100%);
+  pointer-events: none;
+}
+
+::selection {
+  background: rgba(212, 84, 126, 0.35);
+  color: #fff;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--color-background); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--color-primary-deep), var(--color-primary));
+  border-radius: 99px;
+  border: 2px solid var(--color-background);
+}
+
+/* ============================================================
+   Utilities
+   ============================================================ */
+
+.text-gradient {
+  background: linear-gradient(115deg, var(--color-primary-bright) 0%, var(--color-primary) 45%, var(--color-accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.font-display { font-family: var(--font-display); }
+
+/* Glass panels */
+.glass {
+  background: color-mix(in oklab, var(--color-card) 82%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--color-border);
+}
+
+/* ----- Rotating conic-gradient glow border (signature card effect) ----- */
+.glow-border {
+  position: relative;
+  isolation: isolate;
+}
+.glow-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--angle),
+    transparent 55%,
+    var(--color-primary) 75%,
+    var(--color-accent) 88%,
+    transparent 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  animation: border-rotate 5s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+.glow-border:hover::before { opacity: 1; }
+/* Always-on variant for hero / feature cards */
+.glow-border-always::before { opacity: 0.9; }
+
+@keyframes border-rotate {
+  to { --angle: 360deg; }
+}
+
+/* ----- Marquee ----- */
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll var(--marquee-duration, 32s) linear infinite;
+}
+.marquee-reverse { animation-direction: reverse; }
+.marquee-group:hover .marquee { animation-play-state: paused; }
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ----- Aurora drift (contact CTA background) ----- */
+.aurora {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.55;
+  animation: aurora-drift 16s ease-in-out infinite alternate;
+}
+@keyframes aurora-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(6%, -8%) scale(1.15); }
+  100% { transform: translate(-6%, 6%) scale(0.95); }
+}
+
+/* ----- Float / glow / shimmer / spin ----- */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-22px); }
+}
+.float-slow { animation: float-slow 8s ease-in-out infinite; }
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.45; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.08); }
+}
+.glow-pulse { animation: glow-pulse 5s ease-in-out infinite; }
+
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+.spin-slow { animation: spin-slow 22s linear infinite; }
+.spin-slow-rev { animation: spin-slow 30s linear infinite reverse; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3.5s linear infinite;
+}
+
+@keyframes ping-ring {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  80%, 100% { transform: scale(2.2); opacity: 0; }
+}
+.ping-ring { animation: ping-ring 2.4s cubic-bezier(0, 0, 0.2, 1) infinite; }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
