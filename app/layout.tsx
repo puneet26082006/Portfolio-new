@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { Nav } from "../components/nav";
+import { LenisProvider } from "../components/lenis-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,6 +16,14 @@ const geistMono = Geist_Mono({
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+// Inter — the sans awrs.me uses for its section headings (kept scoped to the
+// Coding Profiles title via the .font-ui utility; body text stays on Geist).
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
 });
@@ -59,11 +68,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${inter.variable} antialiased`}
     >
       <body className="min-h-screen bg-background text-foreground">
-        <Nav />
-        {children}
+        <LenisProvider>
+          <Nav />
+          {children}
+        </LenisProvider>
       </body>
     </html>
   );

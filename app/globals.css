@@ -53,7 +53,8 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  /* Smoothness is driven by Lenis (see components/lenis-provider.tsx); native
+     smooth scroll would fight it, so only the anchor offset is kept here. */
   scroll-padding-top: 6rem;
   color-scheme: dark;
 }
@@ -121,6 +122,12 @@ body::after {
 }
 
 .font-display { font-family: var(--font-display); }
+
+/* Inter — awrs.me's section-heading sans (used on the Coding Profiles title). */
+.font-ui {
+  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+}
 
 /* Glass panels */
 .glass {
