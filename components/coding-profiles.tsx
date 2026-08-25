@@ -15,7 +15,7 @@ import {
   SiGeeksforgeeks,
   SiLeetcode,
 } from "react-icons/si";
-import { CountUp, Reveal } from "./ui";
+import { Reveal } from "./ui";
 
 type Profile = {
   name: string;
@@ -96,9 +96,8 @@ const EASE_POWER3: [number, number, number, number] = [0.215, 0.61, 0.355, 1];
 
 /* ------------------------------------------------------------------ *
  * ExitBlur — awrs.me's signature "content softens as it leaves the top".
- * As the wrapped block scrolls up past the viewport top, blur ramps
- * 0 -> 8px and opacity fades late. Driven by scroll MotionValues (no React
- * state), so it never re-renders and never breaks set-state-in-effect.
+ * Sharp through the reading zone; gentle 6px blur only as the block
+ * exits upward. Scroll MotionValues only — never re-renders.
  * ------------------------------------------------------------------ */
 function ExitBlur({
   children,
@@ -112,14 +111,10 @@ function ExitBlur({
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    // Card stays fully sharp through the whole reading zone (centre and below);
-    // the blur only ramps once its top passes into the upper ~20% of the screen
-    // and it starts leaving — a gentle awrs.me soft-exit, never blurring what
-    // you're actually reading.
     offset: ["start 0.2", "end start"],
   });
-  const filter = useTransform(scrollYProgress, [0, 1], ["blur(0px)", "blur(10px)"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8, 1], [1, 1, 0]);
+  const filter = useTransform(scrollYProgress, [0, 1], ["blur(0px)", "blur(6px)"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.85, 1], [1, 1, 0]);
 
   return (
     <motion.div
@@ -133,91 +128,99 @@ function ExitBlur({
 }
 
 /* ------------------------------------------------------------------ *
- * ProfileEntry — one timeline node: a spine marker + a light, transparent
- * card that slides in from its own side once (awrs.me-style), then softens
- * on exit via ExitBlur.
+ * ProfileEntry — one node of the experience-style timeline, ported 1:1
+ * from awrs.me's Experience component: bare content (no card box),
+ * first entry on the LEFT and alternating, text stacked exactly like
+ * theirs (period → title → subtitle → description → meta " · "),
+ * marker = ring + solid-colour circle with white logo riding the line.
+ * Mobile swaps the centre line for a coloured start-border (as they do).
  * ------------------------------------------------------------------ */
 function ProfileEntry({ p, index }: { p: Profile; index: number }) {
   const reduce = useReducedMotion();
-  // Even entries sit on the right of the spine, odd on the left (awrs.me zig-zag).
-  const isRight = index % 2 === 0;
-  const fromX = reduce ? 0 : isRight ? 48 : -48;
+  // awrs.me: `let o = a % 2 == 0` — first entry sits in column 1 (left).
+  const isLeft = index % 2 === 0;
   const Icon = p.icon;
 
-  return (
-    <li className="group/entry relative md:grid md:grid-cols-2 md:items-center md:gap-x-16">
-      {/* Marker — platform logo chip sitting on the spine (awrs.me style: the
-          vertical line passes behind it via a background-coloured ring). */}
-      <span
-        className="absolute left-6 top-1/2 z-20 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-xl border bg-card ring-4 ring-background transition-transform duration-300 group-hover/entry:scale-110 md:left-1/2"
-        style={{ borderColor: `${p.accent}66`, boxShadow: `0 0 16px 1px ${p.accent}44` }}
-        aria-hidden
-      >
-        <Icon className="h-5 w-5" style={{ color: p.accent }} />
-      </span>
+  const meta = [
+    `${p.rating} ${p.ratingLabel}`,
+    ...p.stats.map((s) => `${s.value} ${s.label}`),
+  ];
 
-      <ExitBlur
-        reduce={reduce}
-        className={
-          isRight ? "md:col-start-2" : "md:col-start-1 md:row-start-1"
-        }
-      >
+  return (
+    <li
+      className="group/exp relative border-s-[3px] ps-5 md:border-s-0 md:grid md:grid-cols-2 md:gap-16 md:ps-0"
+      style={{ borderInlineStartColor: p.accent }}
+    >
+      {/* Desktop marker — ring + solid colour disc with white logo, centred on
+          the line at the top of the entry (awrs.me exact construction). */}
+      <div className="absolute top-1 left-1/2 z-10 hidden -translate-x-1/2 items-center justify-center md:flex">
+        <span
+          aria-hidden
+          className="absolute h-11 w-11 rounded-full border-2 transition-transform duration-300 group-hover/exp:scale-110"
+          style={{ borderColor: `${p.accent}40` }}
+        />
+        <span
+          className="grid h-9 w-9 place-items-center rounded-full transition-transform duration-300 group-hover/exp:scale-105"
+          style={{
+            backgroundColor: p.accent,
+            boxShadow: `0 0 0 3px #08080a, 0 0 20px 4px ${p.accent}40`,
+          }}
+        >
+          <Icon className="h-4 w-4 text-white" aria-hidden />
+        </span>
+      </div>
+
+      <ExitBlur reduce={reduce} className={isLeft ? undefined : "md:col-start-2"}>
+        {/* Entrance: down → up (y 40), power3-out, once — awrs.me exact params */}
         <motion.a
           href={p.href}
           target="_blank"
           rel="noopener noreferrer"
-          initial={reduce ? false : { opacity: 0, x: fromX, y: 14 }}
-          whileInView={reduce ? undefined : { opacity: 1, x: 0, y: 0 }}
-          viewport={{ once: true, margin: "0px 0px -15% 0px" }}
-          transition={{ duration: 0.75, ease: EASE_POWER3 }}
-          className="ml-14 flex flex-col gap-3 rounded-2xl border border-border/50 bg-card/25 px-5 py-5 transition-colors duration-300 hover:border-border hover:bg-card/50 md:ml-0"
+          initial={reduce ? false : { opacity: 0, y: 40 }}
+          whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "0px 0px -18% 0px" }}
+          transition={{ duration: 0.8, ease: EASE_POWER3 }}
+          className="block"
         >
-          {/* Rank — the only accent-coloured text, awrs.me "period" slot */}
-          <span
-            className="text-[11px] font-semibold uppercase tracking-[0.16em]"
-            style={{ color: p.accent }}
-          >
-            {p.rank}
-          </span>
-
-          {/* Platform name + handle */}
-          <div>
-            <div className="text-lg font-bold leading-tight text-foreground md:text-xl">
-              {p.name}
-            </div>
-            <div className="mt-0.5 font-mono text-xs text-faint">@{p.handle}</div>
-          </div>
-
-          {/* Rating (CountUp) — theme gradient keeps every card cohesive */}
-          <div className="flex items-end gap-2">
+          {/* Mobile chip + period line */}
+          <div className="flex items-center gap-3 md:block">
             <span
-              className="font-display text-4xl font-bold leading-none"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full md:hidden"
+              style={{
+                backgroundColor: p.accent,
+                boxShadow: `0 0 12px 3px ${p.accent}30`,
+              }}
+              aria-hidden
+            >
+              <Icon className="h-3.5 w-3.5 text-white" />
+            </span>
+            <span
+              className="text-xs font-semibold uppercase tracking-wide"
               style={{ color: p.accent }}
             >
-              <CountUp to={p.rating} />
-            </span>
-            <span className="pb-1 text-[10px] uppercase tracking-wide text-faint">
-              {p.ratingLabel}
+              {p.rank}
             </span>
           </div>
 
-          {/* Stats — one middot-separated line (awrs.me "tags" treatment) */}
-          <div className="flex flex-wrap items-center text-xs text-faint">
-            {p.stats.map((st, i) => (
-              <span key={st.label} className="whitespace-nowrap">
-                {i > 0 && <span className="mx-2 text-border">·</span>}
-                <span className="font-medium text-muted">{st.value}</span> {st.label}
-              </span>
-            ))}
-          </div>
+          {/* Title + handle (awrs: title → coloured subtitle) */}
+          <h3 className="mt-2 text-xl font-bold leading-tight text-foreground">
+            {p.name}
+          </h3>
+          <p className="mt-1 text-sm font-medium" style={{ color: p.accent }}>
+            @{p.handle}
+          </p>
 
-          {/* Link */}
-          <div className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-muted transition-colors group-hover/entry:text-foreground">
+          {/* Meta — one middot-joined line (awrs tags treatment) */}
+          <p className="mt-3 text-xs tracking-wide text-faint">
+            {meta.join(" · ")}
+          </p>
+
+          <span className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-muted transition-colors group-hover/exp:text-foreground">
             View profile
-            <span className="transition-transform duration-300 group-hover/entry:translate-x-0.5">
+            <span className="inline-block transition-transform duration-300 group-hover/exp:translate-x-0.5">
               ↗
             </span>
-          </div>
+          </span>
         </motion.a>
       </ExitBlur>
     </li>
@@ -228,26 +231,27 @@ export function CodingProfiles() {
   const timelineRef = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
 
-  // Scroll-scrubbed spine: progress runs as the timeline crosses the viewport,
-  // matching awrs.me's scrubbed experience line (start ~75% down, finish ~40%).
+  // Scroll-scrubbed spine — awrs.me: grow from "top 70%" to "bottom 30%",
+  // scrubbed (~0.3 smoothing ⇒ light spring).
   const { scrollYProgress } = useScroll({
     target: timelineRef,
-    offset: ["start 0.75", "end 0.4"],
+    offset: ["start 0.7", "end 0.3"],
   });
   const fill = useSpring(scrollYProgress, {
-    stiffness: 120,
+    stiffness: 150,
     damping: 30,
     restDelta: 0.001,
   });
-  const dotTop = useTransform(fill, [0, 1], ["0%", "100%"]);
+  const dotOpacity = useTransform(fill, [0, 0.97], [0, 1]);
+  const headTop = useTransform(fill, [0, 1], ["0%", "100%"]);
 
   return (
     <section
       id="coding"
-      className="relative scroll-mt-24 border-y border-border/60 bg-background-soft/40 py-24 md:py-32"
+      className="relative scroll-mt-24 border-t border-border/60 bg-background-soft/40 pb-16 pt-24 md:pb-24 md:pt-32"
     >
       <div className="mx-auto max-w-6xl px-6">
-        {/* Heading — awrs.me style: left-aligned Inter (sans) bold + accent bar */}
+        {/* Heading — awrs.me style: left-aligned Inter bold + accent bar */}
         <div className="mb-14 max-w-2xl">
           <Reveal>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-1.5 font-mono text-xs uppercase tracking-[0.2em] text-primary">
@@ -265,42 +269,32 @@ export function CodingProfiles() {
           </Reveal>
         </div>
 
-        {/* Timeline */}
-        <div ref={timelineRef} className="relative">
-          {/* Spine — thin, neutral awrs.me line: fades in at the top, draws
-              downward as you scroll, and terminates in a dot at the bottom end. */}
+        {/* Timeline — awrs.me narrows to max-w-4xl and centres it */}
+        <div ref={timelineRef} className="relative mx-auto max-w-4xl">
+          {/* Running line — 2px, centred, desktop only (mobile uses the
+              coloured start-borders). Grows with scroll; brand-coloured so it
+              visibly "runs"; terminal dot at its end (awrs.me). */}
           <div
-            className="pointer-events-none absolute bottom-0 left-6 top-0 w-0.5 md:left-1/2 md:-translate-x-1/2"
+            className="pointer-events-none absolute inset-y-0 left-6 z-0 hidden w-[2px] -translate-x-1/2 md:left-1/2 md:block"
             aria-hidden
           >
-            {/* masked line (track + scrubbed fill) — fades out only at the top */}
-            <div
-              className="absolute inset-0"
-              style={{
-                WebkitMaskImage:
-                  "linear-gradient(to bottom, transparent 0%, #000 14%, #000 100%)",
-                maskImage:
-                  "linear-gradient(to bottom, transparent 0%, #000 14%, #000 100%)",
-              }}
-            >
-              {/* faint static track */}
-              <div className="absolute inset-0 bg-white/10" />
-              {/* scroll-scrubbed fill — thin, soft, fades toward its tip */}
-              <motion.div
-                className="absolute inset-x-0 top-0 h-full bg-gradient-to-b from-white/60 to-white/15"
-                style={{ scaleY: reduce ? 1 : fill, transformOrigin: "top" }}
-              />
-            </div>
-            {/* soft head that rides the growing line */}
-            <motion.span
-              className="absolute left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-white shadow-[0_0_8px_2px_rgba(255,255,255,0.45)]"
-              style={{ top: reduce ? "100%" : dotTop, opacity: reduce ? 0 : 1 }}
+            <motion.div
+              className="h-full w-full origin-top bg-gradient-to-b from-primary-bright via-primary to-accent"
+              style={{ scaleY: reduce ? 1 : fill }}
             />
-            {/* terminal dot at the end of the line (awrs.me) */}
-            <span className="absolute bottom-0 left-1/2 h-2.5 w-2.5 -translate-x-1/2 translate-y-1/2 rounded-full bg-white shadow-[0_0_10px_3px_rgba(255,255,255,0.35)]" />
+            {/* soft head riding the growing tip */}
+            <motion.span
+              className="absolute left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-primary-bright shadow-[0_0_10px_3px_rgba(212,84,126,0.55)]"
+              style={{ top: headTop, opacity: reduce ? 0 : 1 }}
+            />
+            {/* terminal dot at the end of the line */}
+            <motion.span
+              className="absolute bottom-0 left-1/2 h-3 w-3 -translate-x-1/2 translate-y-1/2 rounded-full bg-accent shadow-[0_0_14px_4px_rgba(245,158,11,0.45)]"
+              style={{ opacity: reduce ? 1 : dotOpacity }}
+            />
           </div>
 
-          <ol className="relative space-y-8 md:space-y-14">
+          <ol className="relative space-y-10 md:space-y-20">
             {PROFILES.map((p, i) => (
               <ProfileEntry key={p.name} p={p} index={i} />
             ))}
