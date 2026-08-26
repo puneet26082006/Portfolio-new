@@ -195,6 +195,17 @@ body::after {
   to { transform: translateX(-50%); }
 }
 
+/* ----- Hero diagonal strips (awrs.me `hero-marquee-track`) -----
+   Each track holds its items twice, so translateX(-50%) is a seamless loop.
+   Duration is driven per-strip by the inline --marquee-duration. */
+.hero-marquee-track,
+.hero-marquee-track-reverse {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll var(--marquee-duration, 35s) linear infinite;
+}
+.hero-marquee-track-reverse { animation-direction: reverse; }
+
 /* ----- Aurora drift (contact CTA background) ----- */
 .aurora {
   position: absolute;

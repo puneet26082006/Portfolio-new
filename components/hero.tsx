@@ -2,52 +2,139 @@
 
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { Fragment, useCallback, useEffect, useRef } from "react";
-import { Marquee } from "./ui";
+import {
+  CHAR_DUR,
+  CHAR_STAGGER,
+  EASE_POWER2,
+  EASE_POWER3,
+  NAME,
+  T_CHARS,
+  T_GREETING,
+  T_LINE,
+  T_PARTICLES,
+  T_STRIPS,
+  T_TAGLINE,
+} from "@/lib/intro";
 
-const NAME = "Puneet Saxena";
-
-const ROLES = [
-  "Competitive Programmer",
-  "Full-Stack Developer",
-  "React.js",
-  "Node.js",
-  "TypeScript",
-  "AI App Builder",
-  "Codeforces Pupil",
-  "CodeChef 2★",
-  "Problem Solver",
-  "C++",
+/* ------------------------------------------------------------------ *
+ * Diagonal marquee strips — awrs.me's `hero-marquee`, ported 1:1 from
+ * their bundle. Two crossing bands sitting low in the hero: a deep-rose
+ * gradient running in reverse at +4deg, and a card-coloured band at
+ * -4deg. Each is left-[-20%] w-[140%] so the rotation never exposes an
+ * edge, and each track holds the items tripled then repeated twice so
+ * translateX(-50%) loops seamlessly.
+ *
+ * Their config:
+ *   [{angle:"4deg", reverse:true,  duration:35, topClass:"top-[75%] md:top-[85%]"},
+ *    {angle:"-4deg",reverse:false, duration:40, topClass:"top-[78%] md:top-[88%]"}]
+ * ------------------------------------------------------------------ */
+const STRIPS = [
+  {
+    angle: "4deg",
+    reverse: true,
+    duration: 35,
+    topClass: "top-[75%] md:top-[85%]",
+    className:
+      "bg-gradient-to-r from-primary-deep via-primary to-primary-deep text-white/80",
+    items: [
+      "Competitive Programmer",
+      "Full-Stack Developer",
+      "AI App Builder",
+      "React & Next.js",
+      "Node.js & Express",
+      "Problem Solver",
+    ],
+  },
+  {
+    angle: "-4deg",
+    reverse: false,
+    duration: 40,
+    topClass: "top-[78%] md:top-[88%]",
+    className: "bg-card border-y border-border text-muted",
+    items: [
+      "Codeforces Pupil",
+      "CodeChef 2★",
+      "LeetCode 1600+",
+      "160-Day DSA Streak",
+      "Top 2% · AI India Impact Summit",
+      "Creative Developer",
+    ],
+  },
 ];
 
-/* Tiny drifting dots — awrs.me's `hero-particle` background (w-1 h-1,
-   primary/20, float-slow with staggered delays). Fixed positions, so the
-   server and client markup always agree (no hydration mismatch). */
+function StripItems({ items }: { items: string[] }) {
+  return (
+    <>
+      {items.map((it, i) => (
+        <span key={i} className="inline-flex shrink-0 items-center">
+          <span className="whitespace-nowrap px-4 text-sm font-bold uppercase tracking-wider md:px-6 md:text-base">
+            {it}
+          </span>
+          <span className="text-[0.5rem] opacity-60">◆</span>
+        </span>
+      ))}
+    </>
+  );
+}
+
+function HeroStrips({ reduce }: { reduce: boolean | null }) {
+  return (
+    <motion.div
+      className="pointer-events-none absolute inset-0 z-[1] overflow-hidden"
+      initial={reduce ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1, delay: T_STRIPS, ease: EASE_POWER2 }}
+      aria-hidden
+    >
+      {STRIPS.map((s, i) => {
+        const tripled = [...s.items, ...s.items, ...s.items];
+        return (
+          <div
+            key={i}
+            className={`absolute left-[-20%] w-[140%] py-3.5 md:py-5 ${s.topClass} ${s.className}`}
+            style={{ transform: `rotate(${s.angle})` }}
+          >
+            <div
+              className={
+                s.reverse ? "hero-marquee-track-reverse" : "hero-marquee-track"
+              }
+              style={
+                { "--marquee-duration": `${s.duration}s` } as React.CSSProperties
+              }
+            >
+              <span className="inline-flex shrink-0 items-center">
+                <StripItems items={tripled} />
+              </span>
+              <span className="inline-flex shrink-0 items-center">
+                <StripItems items={tripled} />
+              </span>
+            </div>
+          </div>
+        );
+      })}
+    </motion.div>
+  );
+}
+
+/* awrs.me's exact 6 hero particles (top/left/right + float-slow delay). */
 const PARTICLES = [
   { top: "18%", left: "12%", delay: 0 },
-  { top: "26%", right: "16%", delay: 1.2 },
-  { top: "62%", left: "18%", delay: 2.4 },
-  { top: "72%", right: "22%", delay: 0.8 },
-  { top: "40%", left: "6%", delay: 3.1 },
-  { top: "34%", right: "8%", delay: 1.9 },
-  { top: "80%", left: "44%", delay: 2.7 },
-  { top: "14%", left: "62%", delay: 3.6 },
+  { top: "25%", right: "18%", delay: 1.5 },
+  { top: "72%", left: "22%", delay: 3 },
+  { top: "68%", right: "14%", delay: 0.8 },
+  { top: "40%", left: "6%", delay: 2.2 },
+  { top: "55%", right: "8%", delay: 4 },
 ];
 
 // awrs.me paints one continuous gradient across the split characters.
 const NAME_GRADIENT =
   "linear-gradient(to right, #a83d62, #d4547e, #e07a9c, #f5b8cc)";
 
-/* awrs.me's hero timeline, ported to framer-motion:
-   greeting  y30 + blur(8px)         -> 0.7s power3.out
-   line      scaleX 0 -> 1
-   chars     y60, rotateX 90, blur4  -> 0.5s stagger .04 back.out(1.7)
-   tagline   y20 + blur(6px)         -> 0.7s
-   Their GSAP `back.out(1.7)` is framer-motion's "backOut". */
-const EASE_POWER3: [number, number, number, number] = [0.215, 0.61, 0.355, 1];
-
 const nameContainer: Variants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.04, delayChildren: 0.5 } },
+  show: {
+    transition: { staggerChildren: CHAR_STAGGER, delayChildren: T_CHARS },
+  },
 };
 
 const charVariant: Variants = {
@@ -57,7 +144,7 @@ const charVariant: Variants = {
     opacity: 1,
     rotateX: 0,
     filter: "blur(0px)",
-    transition: { duration: 0.5, ease: "backOut" },
+    transition: { duration: CHAR_DUR, ease: "backOut" },
   },
 };
 
@@ -106,7 +193,7 @@ export function Hero() {
   return (
     <section
       id="top"
-      className="relative -mt-20 flex min-h-screen items-center justify-center overflow-hidden px-6 pt-20"
+      className="relative -mt-20 flex min-h-screen items-center justify-center overflow-hidden pt-20"
     >
       {/* Single soft rose glow — awrs.me's
           radial-gradient(circle, primary-glow 0%, transparent 70%) */}
@@ -118,6 +205,9 @@ export function Hero() {
         }}
         aria-hidden
       />
+
+      {/* Diagonal marquee strips low in the hero */}
+      <HeroStrips reduce={reduce} />
 
       {/* Drifting particles */}
       <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden>
@@ -133,37 +223,17 @@ export function Hero() {
             }}
             initial={reduce ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 1.1 + i * 0.05 }}
+            transition={{ duration: 0.8, delay: T_PARTICLES + i * 0.05 }}
           />
         ))}
       </div>
 
-      <div className="relative z-10 w-full max-w-4xl -translate-y-6 text-center">
-        {/* Role marquee — awrs.me fades `.hero-marquee` in first */}
-        <motion.div
-          initial={reduce ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className="mb-10 w-full [mask-image:linear-gradient(to_right,transparent,#000_12%,#000_88%,transparent)]"
-        >
-          <Marquee duration={26}>
-            {ROLES.map((r) => (
-              <span
-                key={r}
-                className="mx-3 inline-flex items-center gap-3 font-mono text-sm text-muted"
-              >
-                {r}
-                <span className="text-primary">◆</span>
-              </span>
-            ))}
-          </Marquee>
-        </motion.div>
-
+      <div className="relative z-10 max-w-4xl -translate-y-16 px-6 text-center">
         {/* Greeting eyebrow */}
         <motion.p
           initial={reduce ? false : { y: 30, opacity: 0, filter: "blur(8px)" }}
           animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-          transition={{ duration: 0.7, delay: 0.25, ease: EASE_POWER3 }}
+          transition={{ duration: 0.7, delay: T_GREETING, ease: EASE_POWER3 }}
           className="font-ui mb-4 text-sm font-semibold uppercase tracking-[0.25em] text-muted md:text-base"
         >
           Hi, I&apos;m
@@ -173,7 +243,7 @@ export function Hero() {
         <motion.span
           initial={reduce ? false : { scaleX: 0, opacity: 0 }}
           animate={{ scaleX: 1, opacity: 1 }}
-          transition={{ duration: 0.7, delay: 0.4, ease: EASE_POWER3 }}
+          transition={{ duration: 0.5, delay: T_LINE, ease: EASE_POWER2 }}
           className="mx-auto mb-8 block h-px w-10 origin-center bg-gradient-to-r from-transparent via-primary to-transparent"
           aria-hidden
         />
@@ -188,7 +258,8 @@ export function Hero() {
           initial={reduce ? false : "hidden"}
           animate="show"
           aria-label={NAME}
-          className="font-ui mb-6 pb-3 text-5xl font-black leading-[1.05] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl"
+          className="font-ui mb-10 pb-3 text-5xl font-black leading-[1.05] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl"
+          style={{ perspective: "600px" }}
         >
           {NAME.split(" ").map((word, wi) => (
             <Fragment key={`${word}-${wi}`}>
@@ -205,7 +276,6 @@ export function Hero() {
                       backgroundImage: NAME_GRADIENT,
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
-                      transformPerspective: 600,
                       willChange: "transform, filter, opacity",
                     }}
                   >
@@ -221,31 +291,13 @@ export function Hero() {
         <motion.p
           initial={reduce ? false : { y: 20, opacity: 0, filter: "blur(6px)" }}
           animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-          transition={{ duration: 0.7, delay: 1.05, ease: EASE_POWER3 }}
+          transition={{ duration: 0.7, delay: T_TAGLINE, ease: EASE_POWER3 }}
           className="mx-auto max-w-xl text-lg font-medium leading-relaxed text-muted md:text-xl"
         >
           Competitive programmer &amp; full-stack developer turning hard problems
           into fast, scalable products.
         </motion.p>
       </div>
-
-      {/* Scroll cue */}
-      <motion.a
-        href="#about"
-        aria-label="Scroll to about"
-        initial={reduce ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.6 }}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2"
-      >
-        <span className="flex h-9 w-6 items-start justify-center rounded-full border border-border p-1.5">
-          <motion.span
-            animate={reduce ? undefined : { y: [0, 8, 0] }}
-            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-            className="h-1.5 w-1 rounded-full bg-primary"
-          />
-        </span>
-      </motion.a>
     </section>
   );
 }
