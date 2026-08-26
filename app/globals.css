@@ -8,13 +8,16 @@
 */
 
 @theme {
-  /* Surfaces */
-  --color-background: #08080a;
+  /* Surfaces — background matches awrs.me's flat, near-black page surface.
+     It is deliberately the same tone the Coding Profiles band used to paint
+     on top, so every section now shares ONE continuous surface. */
+  --color-background: #0b0b0e;
   --color-background-soft: #0e0e11;
   --color-card: #141418;
   --color-card-soft: #1b1b21;
   --color-border: #26262d;
   --color-border-soft: #1e1e24;
+  --color-navbar: rgba(18, 18, 22, 0.6);
 
   /* Text */
   --color-foreground: #ededed;
@@ -68,16 +71,19 @@ body {
   overflow-x: hidden;
 }
 
-/* Ambient page background: soft rose/amber aurora + subtle grid */
+/* Ambient page background: awrs.me keeps this almost flat — one whisper-soft
+   rose glow at the very top instead of the multi-orb aurora that read as
+   "AI-generated". The hero paints its own radial glow on top of this. */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -2;
-  background:
-    radial-gradient(60rem 40rem at 15% -10%, rgba(212, 84, 126, 0.16), transparent 60%),
-    radial-gradient(50rem 40rem at 100% 10%, rgba(245, 158, 11, 0.10), transparent 55%),
-    radial-gradient(40rem 40rem at 50% 120%, rgba(212, 84, 126, 0.10), transparent 60%);
+  background: radial-gradient(
+    75rem 45rem at 50% -12%,
+    rgba(212, 84, 126, 0.07),
+    transparent 62%
+  );
   pointer-events: none;
 }
 
@@ -87,11 +93,13 @@ body::after {
   inset: 0;
   z-index: -2;
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.028) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
   background-size: 56px 56px;
-  mask-image: radial-gradient(ellipse 100% 70% at 50% 0%, #000 40%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse 100% 70% at 50% 0%, #000 40%, transparent 100%);
+  /* Even, page-wide grid (was clipped to the top) so no section reads as a
+     different surface — the whole page is one animated sheet. */
+  mask-image: linear-gradient(to bottom, #000 0%, #000 65%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 65%, transparent 100%);
   pointer-events: none;
 }
 
@@ -238,6 +246,29 @@ body::after {
   80%, 100% { transform: scale(2.2); opacity: 0; }
 }
 .ping-ring { animation: ping-ring 2.4s cubic-bezier(0, 0, 0.2, 1) infinite; }
+
+/* ----- Floating-nav top-edge glow beam (awrs.me-style) ----- */
+@keyframes nav-beam-sweep {
+  0%   { left: -12%; opacity: 0; }
+  12%  { opacity: 1; }
+  55%  { opacity: 1; }
+  70%  { opacity: 0; }
+  100% { left: 104%; opacity: 0; }
+}
+.nav-glow-beam {
+  width: 96px;
+  background: linear-gradient(90deg, transparent, var(--color-primary) 45%, var(--color-accent) 60%, transparent);
+  filter: blur(3px);
+  animation: nav-beam-sweep 5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+.nav-glow-core {
+  width: 42px;
+  background: linear-gradient(90deg, transparent, #fff 50%, transparent);
+  filter: blur(1px);
+  opacity: 0.8;
+  animation: nav-beam-sweep 5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  animation-delay: 0.12s;
+}
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {

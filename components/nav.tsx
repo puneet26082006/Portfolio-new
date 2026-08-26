@@ -1,177 +1,178 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const LINKS = [
-  { href: "#about", label: "About" },
-  { href: "#coding", label: "Coding" },
-  { href: "#skills", label: "Skills" },
-  { href: "#projects", label: "Projects" },
-  { href: "#achievements", label: "Achievements" },
-  { href: "#education", label: "Education" },
-  { href: "#contact", label: "Contact" },
+  { href: "/", label: "Home" },
+  { href: "/projects", label: "Projects" },
+  { href: "/blog", label: "Blog" },
+  { href: "/wall", label: "The Wall" },
+  { href: "/contact", label: "Contact" },
 ];
 
+const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
+/* awrs.me's exact chain-link glyph (their "open navigation" button icon). */
+function LinkIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      aria-hidden
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M18 3a3 3 0 00-3 3v12a3 3 0 003 3 3 3 0 003-3 3 3 0 00-3-3H6a3 3 0 00-3 3 3 3 0 003 3 3 3 0 003-3V6a3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3h12a3 3 0 003-3 3 3 0 00-3-3z"
+      />
+    </svg>
+  );
+}
+
 export function Nav() {
-  const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [active, setActive] = useState<string>("");
+  const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
-  // Scroll-spy for active section
+  // Lock body scroll while the overlay menu is open
   useEffect(() => {
-    const ids = LINKS.map((l) => l.href.slice(1));
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) setActive(e.target.id);
-        });
-      },
-      { rootMargin: "-45% 0px -50% 0px", threshold: 0 }
-    );
-    ids.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
+    document.body.style.overflow = menuOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [open]);
+  }, [menuOpen]);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-4">
-      <nav
-        className={`flex w-full max-w-5xl items-center justify-between rounded-full px-3 py-2 pl-5 transition-all duration-500 ${
-          scrolled
-            ? "glass shadow-[0_8px_40px_-12px_rgba(0,0,0,0.7)]"
-            : "border border-transparent bg-transparent"
-        }`}
+    <>
+      {/* ---- Left flank: monogram logo → home (awrs.me top-5 left-[18%]) ---- */}
+      <Link
+        href="/"
+        className="group hidden md:flex fixed top-5 left-[18%] z-50 items-center"
+        aria-label="Home"
       >
-        <a
-          href="#top"
-          className="group flex items-center gap-2.5 font-display text-lg font-bold tracking-tight"
-        >
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-accent text-sm font-bold text-white shadow-lg shadow-primary/30">
-            PS
-          </span>
-          <span className="text-foreground transition-colors group-hover:text-primary">
-            Puneet<span className="text-primary">.</span>
-          </span>
-        </a>
+        <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-primary to-accent text-sm font-bold text-white shadow-lg shadow-primary/30 transition-transform duration-300 group-hover:scale-110">
+          PS
+        </span>
+      </Link>
 
-        <ul className="hidden items-center gap-1 md:flex">
-          {LINKS.map((l) => (
-            <li key={l.href}>
-              <a
+      {/* ---- Right flank: chain-link button → overlay nav (awrs.me exact) ---- */}
+      <button
+        onClick={() => setMenuOpen(true)}
+        className="hidden md:flex fixed top-5 right-[18%] z-50 h-10 w-10 items-center justify-center rounded-xl bg-navbar backdrop-blur-xl border border-border text-muted hover:text-foreground hover:scale-105 transition-all cursor-pointer"
+        aria-label="Open navigation"
+      >
+        <LinkIcon className="w-[18px] h-[18px]" />
+      </button>
+
+      {/* ---- Center: floating pill nav — links only (awrs.me floating-nav) ---- */}
+      <nav
+        className="floating-nav hidden md:block fixed top-4 inset-x-0 mx-auto w-fit z-40 rounded-full bg-navbar backdrop-blur-xl border border-border transition-shadow duration-300"
+        aria-label="Primary"
+      >
+        <div className="flex items-center h-12 px-1.5">
+          <div className="flex items-center gap-1 relative px-1">
+            {LINKS.map((l) => (
+              <Link
+                key={l.href}
                 href={l.href}
-                className={`relative rounded-full px-3.5 py-1.5 text-sm transition-colors ${
-                  active === l.href.slice(1)
-                    ? "text-foreground"
-                    : "text-muted hover:text-foreground"
+                className={`nav-item relative z-10 px-5 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors duration-200 ${
+                  isActive(l.href) ? "text-foreground" : "text-muted hover:text-foreground"
                 }`}
               >
-                {active === l.href.slice(1) && (
-                  <motion.span
-                    layoutId="nav-pill"
-                    className="absolute inset-0 -z-10 rounded-full bg-primary/12 ring-1 ring-primary/25"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
+                {isActive(l.href) && (
+                  <>
+                    {/* light parked on the navbar's top edge, above the active
+                        page name — slides to the newly selected link (awrs.me) */}
+                    <motion.span
+                      layoutId="nav-light"
+                      className="absolute -top-[9px] left-1 right-1 h-[2px] rounded-full bg-gradient-to-r from-transparent via-primary-bright to-transparent shadow-[0_0_12px_2px_rgba(212,84,126,0.55)] pointer-events-none"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                    <motion.span
+                      layoutId="nav-active-pill"
+                      className="absolute inset-0 -z-10 rounded-full bg-white/[0.08] ring-1 ring-white/[0.08] pointer-events-none"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  </>
                 )}
                 {l.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-
-        <div className="flex items-center gap-2">
-          <a
-            href="#contact"
-            className="hidden rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background transition-transform hover:-translate-y-0.5 sm:inline-block"
-          >
-            Let&apos;s talk
-          </a>
-          <button
-            onClick={() => setOpen((v) => !v)}
-            className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card/60 text-foreground md:hidden"
-            aria-label={open ? "Close menu" : "Open menu"}
-            aria-expanded={open}
-          >
-            <div className="relative h-4 w-5">
-              <span
-                className={`absolute left-0 h-0.5 w-5 bg-current transition-all duration-300 ${
-                  open ? "top-1.5 rotate-45" : "top-0"
-                }`}
-              />
-              <span
-                className={`absolute left-0 top-1.5 h-0.5 w-5 bg-current transition-all duration-300 ${
-                  open ? "opacity-0" : "opacity-100"
-                }`}
-              />
-              <span
-                className={`absolute left-0 h-0.5 w-5 bg-current transition-all duration-300 ${
-                  open ? "top-1.5 -rotate-45" : "top-3"
-                }`}
-              />
-            </div>
-          </button>
+              </Link>
+            ))}
+          </div>
         </div>
       </nav>
 
+      {/* ---- Mobile: compact logo bar (tap → overlay) ---- */}
+      <div className="md:hidden fixed top-4 left-1/2 -translate-x-1/2 z-40 w-[200px]">
+        <button
+          onClick={() => setMenuOpen(true)}
+          className="flex w-full items-center justify-center gap-2.5 h-12 rounded-full bg-navbar backdrop-blur-xl border border-border cursor-pointer select-none"
+          aria-label="Open menu"
+          aria-expanded={menuOpen}
+        >
+          <span className="grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-primary to-accent text-[11px] font-bold text-white">
+            PS
+          </span>
+          <span className="text-sm font-medium text-foreground whitespace-nowrap">
+            Puneet<span className="text-primary">.</span>
+          </span>
+        </button>
+      </div>
+
+      {/* ---- Full-screen overlay menu (right button / mobile bar) ---- */}
       <AnimatePresence>
-        {open && (
+        {menuOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 top-0 z-[-1] md:hidden"
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-background/90 backdrop-blur-2xl"
+            onClick={() => setMenuOpen(false)}
           >
-            <div
-              className="absolute inset-0 bg-background/95 backdrop-blur-xl"
-              onClick={() => setOpen(false)}
-            />
+            <button
+              onClick={() => setMenuOpen(false)}
+              className="absolute top-5 right-6 grid h-10 w-10 place-items-center rounded-xl border border-border bg-card/60 text-foreground"
+              aria-label="Close menu"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+                <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
             <motion.ul
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -20, opacity: 0 }}
-              transition={{ ease: [0.16, 1, 0.3, 1], duration: 0.4 }}
-              className="absolute inset-x-4 top-24 space-y-1 rounded-3xl glass p-4"
+              initial="hidden"
+              animate="show"
+              variants={{ show: { transition: { staggerChildren: 0.06 } } }}
+              className="flex flex-col items-center gap-2"
             >
               {LINKS.map((l) => (
-                <li key={l.href}>
-                  <a
+                <motion.li
+                  key={l.href}
+                  variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE } } }}
+                >
+                  <Link
                     href={l.href}
-                    onClick={() => setOpen(false)}
-                    className="block rounded-2xl px-4 py-3 text-lg font-medium text-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                    onClick={() => setMenuOpen(false)}
+                    className={`font-display text-4xl font-bold transition-colors ${
+                      isActive(l.href) ? "text-primary" : "text-foreground hover:text-primary"
+                    }`}
                   >
                     {l.label}
-                  </a>
-                </li>
+                  </Link>
+                </motion.li>
               ))}
-              <li className="pt-2">
-                <a
-                  href="#contact"
-                  onClick={() => setOpen(false)}
-                  className="block rounded-2xl bg-gradient-to-r from-primary to-accent px-4 py-3 text-center text-lg font-semibold text-white"
-                >
-                  Let&apos;s talk
-                </a>
-              </li>
             </motion.ul>
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </>
   );
 }

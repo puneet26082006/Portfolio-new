@@ -1,8 +1,10 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
-import { motion } from "framer-motion";
-import { CountUp, Marquee } from "./ui";
+import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { Fragment, useCallback, useEffect, useRef } from "react";
+import { Marquee } from "./ui";
+
+const NAME = "Puneet Saxena";
 
 const ROLES = [
   "Competitive Programmer",
@@ -17,96 +19,132 @@ const ROLES = [
   "C++",
 ];
 
-const QUICK_STATS = [
-  { to: 300, suffix: "+", label: "DSA Problems" },
-  { to: 1600, suffix: "", label: "LeetCode Rating" },
-  { to: 8.71, decimals: 2, label: "CGPA / 10" },
-  { to: 2, suffix: "%", prefix: "Top ", label: "AI Impact Summit" },
+/* Tiny drifting dots — awrs.me's `hero-particle` background (w-1 h-1,
+   primary/20, float-slow with staggered delays). Fixed positions, so the
+   server and client markup always agree (no hydration mismatch). */
+const PARTICLES = [
+  { top: "18%", left: "12%", delay: 0 },
+  { top: "26%", right: "16%", delay: 1.2 },
+  { top: "62%", left: "18%", delay: 2.4 },
+  { top: "72%", right: "22%", delay: 0.8 },
+  { top: "40%", left: "6%", delay: 3.1 },
+  { top: "34%", right: "8%", delay: 1.9 },
+  { top: "80%", left: "44%", delay: 2.7 },
+  { top: "14%", left: "62%", delay: 3.6 },
 ];
 
-type Greeting = { text: string; icon: string };
+// awrs.me paints one continuous gradient across the split characters.
+const NAME_GRADIENT =
+  "linear-gradient(to right, #a83d62, #d4547e, #e07a9c, #f5b8cc)";
 
-function greetingFor(hour: number): Greeting {
-  if (hour < 5) return { text: "Good Night", icon: "🌙" };
-  if (hour < 12) return { text: "Good Morning", icon: "☀️" };
-  if (hour < 17) return { text: "Good Afternoon", icon: "🌤️" };
-  if (hour < 21) return { text: "Good Evening", icon: "🌆" };
-  return { text: "Good Night", icon: "🌙" };
-}
+/* awrs.me's hero timeline, ported to framer-motion:
+   greeting  y30 + blur(8px)         -> 0.7s power3.out
+   line      scaleX 0 -> 1
+   chars     y60, rotateX 90, blur4  -> 0.5s stagger .04 back.out(1.7)
+   tagline   y20 + blur(6px)         -> 0.7s
+   Their GSAP `back.out(1.7)` is framer-motion's "backOut". */
+const EASE_POWER3: [number, number, number, number] = [0.215, 0.61, 0.355, 1];
 
-// Client-only greeting via useSyncExternalStore: server/hydration render the
-// neutral fallback (no mismatch), then the client swaps to the time-based value.
-// Snapshots must be referentially stable, so both are cached.
-const FALLBACK_GREETING: Greeting = { text: "Welcome", icon: "👋" };
-let clientGreeting: Greeting | null = null;
+const nameContainer: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.04, delayChildren: 0.5 } },
+};
 
-const subscribeGreeting = () => () => {};
-function getGreetingSnapshot(): Greeting {
-  if (!clientGreeting) clientGreeting = greetingFor(new Date().getHours());
-  return clientGreeting;
-}
-function getGreetingServerSnapshot(): Greeting {
-  return FALLBACK_GREETING;
-}
+const charVariant: Variants = {
+  hidden: { y: 60, opacity: 0, rotateX: 90, filter: "blur(4px)" },
+  show: {
+    y: 0,
+    opacity: 1,
+    rotateX: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.5, ease: "backOut" },
+  },
+};
 
 export function Hero() {
-  const greeting = useSyncExternalStore(
-    subscribeGreeting,
-    getGreetingSnapshot,
-    getGreetingServerSnapshot,
-  );
+  const reduce = useReducedMotion();
+  const nameRef = useRef<HTMLHeadingElement>(null);
+
+  /* Stretch ONE gradient across the characters: chars are grouped by visual
+     line (rounded offsetTop) and each line gets a single left→right gradient
+     sized to that line's width. Painting per-line keeps the effect correct
+     even if the name wraps on a narrow screen. Pure DOM writes (awrs.me does
+     the same) — no state, so this never re-renders. offsetLeft is layout-based,
+     so in-flight transforms don't skew it. */
+  const paintGradient = useCallback(() => {
+    const h1 = nameRef.current;
+    if (!h1) return;
+    const chars = Array.from(h1.querySelectorAll<HTMLElement>("[data-char]"));
+    if (!chars.length) return;
+    const lines = new Map<number, HTMLElement[]>();
+    chars.forEach((el) => {
+      const key = Math.round(el.offsetTop);
+      const bucket = lines.get(key);
+      if (bucket) bucket.push(el);
+      else lines.set(key, [el]);
+    });
+    lines.forEach((group) => {
+      const first = group[0];
+      const last = group[group.length - 1];
+      const extent = last.offsetLeft + last.offsetWidth - first.offsetLeft;
+      if (extent <= 0) return;
+      group.forEach((el) => {
+        el.style.backgroundSize = `${extent}px 100%`;
+        el.style.backgroundPosition = `-${el.offsetLeft - first.offsetLeft}px 0`;
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    paintGradient();
+    // Fonts land after first paint and change glyph widths — repaint then.
+    document.fonts?.ready.then(paintGradient).catch(() => {});
+    window.addEventListener("resize", paintGradient);
+    return () => window.removeEventListener("resize", paintGradient);
+  }, [paintGradient]);
 
   return (
     <section
       id="top"
-      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 pt-28 pb-16"
+      className="relative -mt-20 flex min-h-screen items-center justify-center overflow-hidden px-6 pt-20"
     >
-      {/* Ambient orbs */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute left-[8%] top-[22%] h-72 w-72 rounded-full bg-primary/20 blur-[100px] float-slow" />
-        <div className="absolute right-[10%] top-[30%] h-64 w-64 rounded-full bg-accent/15 blur-[100px] float-slow" style={{ animationDelay: "2s" }} />
+      {/* Single soft rose glow — awrs.me's
+          radial-gradient(circle, primary-glow 0%, transparent 70%) */}
+      <div
+        className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[min(860px,120vw)] w-[min(860px,120vw)] -translate-x-1/2 -translate-y-1/2"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(212, 84, 126, 0.13) 0%, transparent 70%)",
+        }}
+        aria-hidden
+      />
+
+      {/* Drifting particles */}
+      <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden>
+        {PARTICLES.map((p, i) => (
+          <motion.span
+            key={i}
+            className="float-slow absolute h-1 w-1 rounded-full bg-primary/20"
+            style={{
+              top: p.top,
+              left: p.left,
+              right: p.right,
+              animationDelay: `${p.delay}s`,
+            }}
+            initial={reduce ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 1.1 + i * 0.05 }}
+          />
+        ))}
       </div>
 
-      {/* Rotating orbit rings behind the name */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 hidden h-[640px] w-[640px] -translate-x-1/2 -translate-y-1/2 md:block">
-        <div className="spin-slow absolute inset-0 rounded-full border border-primary/10" />
-        <div className="spin-slow-rev absolute inset-[70px] rounded-full border border-accent/10" />
-        <div className="spin-slow absolute inset-[140px] rounded-full border border-primary/[0.07]" style={{ animationDuration: "34s" }} />
-        <div className="spin-slow absolute inset-0">
-          <span className="absolute left-1/2 top-0 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-primary shadow-[0_0_16px_4px_rgba(212,84,126,0.6)]" />
-        </div>
-        <div className="spin-slow-rev absolute inset-[70px]">
-          <span className="absolute right-0 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-accent shadow-[0_0_14px_4px_rgba(245,158,11,0.6)]" />
-        </div>
-      </div>
-
-      <div className="relative z-10 flex w-full max-w-5xl flex-col items-center text-center">
-        {/* Availability + greeting */}
+      <div className="relative z-10 w-full max-w-4xl -translate-y-6 text-center">
+        {/* Role marquee — awrs.me fades `.hero-marquee` in first */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-8 flex flex-wrap items-center justify-center gap-3"
-        >
-          <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-medium text-emerald-300">
-            <span className="relative flex h-2 w-2">
-              <span className="ping-ring absolute inline-flex h-full w-full rounded-full bg-emerald-400" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-            </span>
-            Available for opportunities
-          </span>
-          <span className="inline-flex min-w-[9.5rem] items-center gap-2 rounded-full border border-border bg-card/60 px-3.5 py-1.5 text-xs text-muted">
-            <span>{greeting.icon}</span>
-            {greeting.text}
-          </span>
-        </motion.div>
-
-        {/* Role marquee */}
-        <motion.div
-          initial={{ opacity: 0 }}
+          initial={reduce ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.1 }}
-          className="mb-9 w-full max-w-3xl [mask-image:linear-gradient(to_right,transparent,#000_12%,#000_88%,transparent)]"
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="mb-10 w-full [mask-image:linear-gradient(to_right,transparent,#000_12%,#000_88%,transparent)]"
         >
           <Marquee duration={26}>
             {ROLES.map((r) => (
@@ -121,91 +159,88 @@ export function Hero() {
           </Marquee>
         </motion.div>
 
-        {/* Name */}
-        <motion.h1
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-          className="font-display text-[clamp(2.8rem,10vw,7rem)] font-black leading-[0.95] tracking-tight"
-        >
-          <span className="block text-foreground">Hi, I&apos;m</span>
-          <span className="text-gradient block">Puneet Saxena</span>
-        </motion.h1>
-
+        {/* Greeting eyebrow */}
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          className="mt-7 max-w-2xl text-balance text-lg leading-relaxed text-muted md:text-xl"
+          initial={reduce ? false : { y: 30, opacity: 0, filter: "blur(8px)" }}
+          animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+          transition={{ duration: 0.7, delay: 0.25, ease: EASE_POWER3 }}
+          className="font-ui mb-4 text-sm font-semibold uppercase tracking-[0.25em] text-muted md:text-base"
         >
-          A competitive programmer and full-stack developer who turns hard problems
-          into fast, scalable products — from{" "}
-          <span className="text-foreground">1600-rated algorithms</span> to{" "}
-          <span className="text-foreground">AI-powered web apps</span>.
+          Hi, I&apos;m
         </motion.p>
 
-        {/* CTAs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.42 }}
-          className="mt-10 flex flex-col items-center gap-3 sm:flex-row"
-        >
-          <a
-            href="#projects"
-            className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-accent px-7 py-3.5 font-semibold text-white shadow-lg shadow-primary/25 transition-transform hover:-translate-y-0.5"
-          >
-            View Projects
-            <span className="transition-transform group-hover:translate-x-1">→</span>
-          </a>
-          <a
-            href="#contact"
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-card/50 px-7 py-3.5 font-semibold text-foreground transition-colors hover:border-primary/50 hover:text-primary"
-          >
-            Get in Touch
-          </a>
-        </motion.div>
+        {/* Hairline under the greeting */}
+        <motion.span
+          initial={reduce ? false : { scaleX: 0, opacity: 0 }}
+          animate={{ scaleX: 1, opacity: 1 }}
+          transition={{ duration: 0.7, delay: 0.4, ease: EASE_POWER3 }}
+          className="mx-auto mb-8 block h-px w-10 origin-center bg-gradient-to-r from-transparent via-primary to-transparent"
+          aria-hidden
+        />
 
-        {/* Quick stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.55 }}
-          className="mt-16 grid w-full max-w-3xl grid-cols-2 gap-4 sm:grid-cols-4"
+        {/* Name — per-character 3D flip-up reveal. Split by WORD: each word is
+            a `whitespace-nowrap` unit, so a line can only ever break at the
+            space between words, never mid-word ("Saxena" always stays whole).
+            The space between words is a normal breakable text node. */}
+        <motion.h1
+          ref={nameRef}
+          variants={reduce ? undefined : nameContainer}
+          initial={reduce ? false : "hidden"}
+          animate="show"
+          aria-label={NAME}
+          className="font-ui mb-6 pb-3 text-5xl font-black leading-[1.05] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl"
         >
-          {QUICK_STATS.map((s) => (
-            <div
-              key={s.label}
-              className="glow-border rounded-2xl border border-border bg-card/50 px-4 py-5"
-            >
-              <div className="font-display text-3xl font-bold text-gradient md:text-4xl">
-                <CountUp
-                  to={s.to}
-                  prefix={s.prefix}
-                  suffix={s.suffix}
-                  decimals={s.decimals ?? 0}
-                />
-              </div>
-              <div className="mt-1.5 text-xs uppercase tracking-wide text-faint">
-                {s.label}
-              </div>
-            </div>
+          {NAME.split(" ").map((word, wi) => (
+            <Fragment key={`${word}-${wi}`}>
+              {wi > 0 && " "}
+              <span className="inline-block whitespace-nowrap">
+                {word.split("").map((ch, ci) => (
+                  <motion.span
+                    key={`${ch}-${ci}`}
+                    data-char
+                    variants={reduce ? undefined : charVariant}
+                    aria-hidden
+                    className="inline-block bg-clip-text"
+                    style={{
+                      backgroundImage: NAME_GRADIENT,
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      transformPerspective: 600,
+                      willChange: "transform, filter, opacity",
+                    }}
+                  >
+                    {ch}
+                  </motion.span>
+                ))}
+              </span>
+            </Fragment>
           ))}
-        </motion.div>
+        </motion.h1>
+
+        {/* Tagline */}
+        <motion.p
+          initial={reduce ? false : { y: 20, opacity: 0, filter: "blur(6px)" }}
+          animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+          transition={{ duration: 0.7, delay: 1.05, ease: EASE_POWER3 }}
+          className="mx-auto max-w-xl text-lg font-medium leading-relaxed text-muted md:text-xl"
+        >
+          Competitive programmer &amp; full-stack developer turning hard problems
+          into fast, scalable products.
+        </motion.p>
       </div>
 
       {/* Scroll cue */}
       <motion.a
         href="#about"
         aria-label="Scroll to about"
-        initial={{ opacity: 0 }}
+        initial={reduce ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
+        transition={{ delay: 1.6 }}
         className="absolute bottom-6 left-1/2 -translate-x-1/2"
       >
         <span className="flex h-9 w-6 items-start justify-center rounded-full border border-border p-1.5">
           <motion.span
-            animate={{ y: [0, 8, 0] }}
+            animate={reduce ? undefined : { y: [0, 8, 0] }}
             transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
             className="h-1.5 w-1 rounded-full bg-primary"
           />

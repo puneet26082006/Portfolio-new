@@ -248,7 +248,7 @@ export function CodingProfiles() {
   return (
     <section
       id="coding"
-      className="relative scroll-mt-24 border-t border-border/60 bg-background-soft/40 pb-16 pt-24 md:pb-24 md:pt-32"
+      className="relative scroll-mt-24 pb-16 pt-24 md:pb-24 md:pt-32"
     >
       <div className="mx-auto max-w-6xl px-6">
         {/* Heading — awrs.me style: left-aligned Inter bold + accent bar */}

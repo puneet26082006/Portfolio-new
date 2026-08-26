@@ -49,7 +49,7 @@ export function Skills() {
   return (
     <section
       id="skills"
-      className="relative scroll-mt-24 border-b border-border/60 bg-background-soft/40 pb-24 pt-12 md:pb-32 md:pt-16"
+      className="relative scroll-mt-24 pb-24 pt-12 md:pb-32 md:pt-16"
     >
       <div className="mx-auto max-w-6xl px-6">
         {/* Heading — matches the Coding Profiles section (left-aligned Inter

@@ -48,7 +48,7 @@ export function Education() {
   return (
     <section
       id="education"
-      className="relative scroll-mt-24 border-y border-border/60 bg-background-soft/40 py-24 md:py-32"
+      className="relative scroll-mt-24 py-24 md:py-32"
     >
       <div className="mx-auto max-w-6xl px-6">
         <SectionHeading eyebrow="Education" title={<>Academic foundation</>} />
