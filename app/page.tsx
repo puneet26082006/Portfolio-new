@@ -6,7 +6,6 @@ import { Projects } from "@/components/projects";
 import { Achievements } from "@/components/achievements";
 import { Education } from "@/components/education";
 import { Contact } from "@/components/contact";
-import { Footer } from "@/components/footer";
 
 export default function Home() {
   return (
@@ -19,7 +18,6 @@ export default function Home() {
       <Achievements />
       <Education />
       <Contact />
-      <Footer />
     </main>
   );
 }

@@ -29,9 +29,9 @@ const ACHIEVEMENTS: Achievement[] = [
   },
   {
     icon: "⭐",
-    title: "CodeChef 2★ Coder",
+    title: "CodeChef 3★ Coder",
     subtitle: "Max Rating 1593",
-    description: "Achieved 2★ with a peak rating of 1593 — closing in on 3★.",
+    description: "Reached 3★ with a peak rating of 1593 and 100+ problems solved.",
   },
   {
     icon: "🥇",
@@ -44,6 +44,18 @@ const ACHIEVEMENTS: Achievement[] = [
     title: "Global Rank #1020",
     subtitle: "Codeforces Div. 3",
     description: "Placed 1020th globally in a Codeforces Division 3 round.",
+  },
+  {
+    icon: "🥈",
+    title: "1st Runner-up — Web Development",
+    subtitle: "JECRC · Jul 2026",
+    description: "Finished first runner-up in a college web development competition.",
+  },
+  {
+    icon: "🥉",
+    title: "3rd Place — ScreenFlex",
+    subtitle: "JECRC · Feb 2026",
+    description: "Built a website clone from scratch under competition constraints.",
   },
   {
     icon: "🔥",
@@ -60,9 +72,9 @@ const ACHIEVEMENTS: Achievement[] = [
   },
   {
     icon: "💡",
-    title: "300+ DSA Problems",
-    subtitle: "Across 4 platforms",
-    description: "Solved 300+ algorithmic problems on Codeforces, CodeChef, LeetCode & GfG.",
+    title: "Multi-platform DSA Practice",
+    subtitle: "Codeforces · CodeChef · LeetCode · GfG",
+    description: "Built consistency across contests, daily challenges, and structured DSA practice.",
   },
 ];
 

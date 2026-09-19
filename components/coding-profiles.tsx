@@ -52,7 +52,7 @@ const PROFILES: Profile[] = [
     handle: "puneet_26",
     accent: "#ec4899",
     icon: SiCodechef,
-    rank: "2★ Coder",
+    rank: "3★ Coder",
     rating: 1593,
     ratingLabel: "Max Rating",
     stats: [
@@ -70,7 +70,7 @@ const PROFILES: Profile[] = [
     rating: 1600,
     ratingLabel: "Contest Rating",
     stats: [
-      { label: "Solved", value: "150+" },
+      { label: "Solved", value: "200+" },
       { label: "Focus", value: "DSA" },
     ],
     href: "https://leetcode.com/u/_puneet26/",

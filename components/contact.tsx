@@ -11,16 +11,16 @@ const METHODS = [
     icon: "✉️",
   },
   {
-    label: "Phone",
-    value: "+91 80007 09820",
-    href: "tel:+918000709820",
-    icon: "📞",
-  },
-  {
     label: "LinkedIn",
     value: "in/puneet-saxena",
     href: "https://www.linkedin.com/in/puneet-saxena-b8594a325/",
     icon: "💼",
+  },
+  {
+    label: "GitHub",
+    value: "@puneet26082006",
+    href: "https://github.com/puneet26082006",
+    icon: "⌘",
   },
 ];
 
