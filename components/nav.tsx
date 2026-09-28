@@ -1,300 +1,204 @@
 "use client";
 
-import {
-  AnimatePresence,
-  animate,
-  motion,
-  useMotionValue,
-  useReducedMotion,
-} from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { T_NAV_SWAP } from "@/lib/intro";
+import { usePathname, useRouter } from "next/navigation";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { PROJECTS } from "@/lib/content";
 
-const LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/projects", label: "Projects" },
-  { href: "/blog", label: "Blog" },
-  { href: "/wall", label: "The Wall" },
-  { href: "/contact", label: "Contact" },
+const PAGES = [
+  { href: "/", label: "Home", index: "01" },
+  { href: "/projects", label: "Projects", index: "02" },
+  { href: "/blog", label: "Journal", index: "03" },
+  { href: "/wall", label: "The Wall", index: "04" },
+  { href: "/contact", label: "Contact", index: "05" },
 ];
 
-const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+const SOCIALS = [
+  { label: "GitHub", href: "https://github.com/puneet26082006" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/puneet-saxena-b8594a325/" },
+  { label: "Codeforces", href: "https://codeforces.com/profile/puneet26" },
+  { label: "LeetCode", href: "https://leetcode.com/u/_puneet26/" },
+];
 
-/* awrs.me's exact chain-link glyph (their "open navigation" button icon). */
-function LinkIcon({ className }: { className?: string }) {
+function greeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return { icon: "☀", label: "Good Morning" };
+  if (hour < 17) return { icon: "◐", label: "Good Afternoon" };
+  return { icon: "☾", label: "Good Evening" };
+}
+
+function MenuMark() {
   return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      aria-hidden
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M18 3a3 3 0 00-3 3v12a3 3 0 003 3 3 3 0 003-3 3 3 0 00-3-3H6a3 3 0 00-3 3 3 3 0 003 3 3 3 0 003-3V6a3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3h12a3 3 0 003-3 3 3 0 00-3-3z"
-      />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-[18px] w-[18px]" aria-hidden>
+      <path strokeLinecap="round" d="M7 8.5h10M7 15.5h10" />
+      <circle cx="5" cy="8.5" r="1" fill="currentColor" stroke="none" />
+      <circle cx="19" cy="15.5" r="1" fill="currentColor" stroke="none" />
     </svg>
   );
 }
 
-/** Time-of-day greeting — awrs.me's three buckets (morning / afternoon /
- *  evening) with the matching emoji seen in their markup (🌤️ afternoon,
- *  🌙 evening). Resolved on the client only, so SSR can't mismatch. */
-function resolveGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return { emoji: "🌅", text: "Good Morning" };
-  if (h < 17) return { emoji: "🌤️", text: "Good Afternoon" };
-  return { emoji: "🌙", text: "Good Evening" };
-}
-
 export function Nav() {
   const pathname = usePathname();
+  const router = useRouter();
   const reduce = useReducedMotion();
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
-
-  /* ---- floating pill: greeting → links morph -------------------------
-     awrs.me ships the nav as `style="width:0;opacity:0;overflow:hidden"`
-     with the greeting panel visible and the links panel `display:none`,
-     then animates the pill's WIDTH between the two panels' natural sizes.
-     Driven entirely by MotionValues + imperative animate(), so there is no
-     state churn and no re-render on any frame. ------------------------- */
-  const navWidth = useMotionValue<number | string>(0);
-  const navOpacity = useMotionValue(0);
-  const greetOpacity = useMotionValue(1);
-  const linksOpacity = useMotionValue(0);
-
-  const greetRef = useRef<HTMLDivElement>(null);
-  const linksRef = useRef<HTMLDivElement>(null);
-  const emojiRef = useRef<HTMLSpanElement>(null);
-  const textRef = useRef<HTMLSpanElement>(null);
-
-  // Mobile bar mirrors the same swap (awrs `mobile-greeting-bar`).
-  const mGreetOpacity = useMotionValue(1);
-  const mBrandOpacity = useMotionValue(0);
-  const mEmojiRef = useRef<HTMLSpanElement>(null);
-  const mTextRef = useRef<HTMLSpanElement>(null);
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [ready, setReady] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [hello, setHello] = useState({ icon: "◐", label: "Welcome" });
 
   useEffect(() => {
-    const greet = greetRef.current;
-    const links = linksRef.current;
-    if (!greet || !links) return;
+    setHello(greeting());
+    const saved = window.localStorage.getItem("portfolio-theme");
+    const nextTheme = saved === "light" ? "light" : "dark";
+    setTheme(nextTheme);
+    document.documentElement.dataset.theme = nextTheme;
+    const timer = window.setTimeout(() => setReady(true), reduce ? 0 : 2450);
+    return () => window.clearTimeout(timer);
+  }, [reduce]);
 
-    // Fill the greeting client-side (DOM writes — no state, no mismatch).
-    const g = resolveGreeting();
-    if (emojiRef.current) emojiRef.current.textContent = g.emoji;
-    if (textRef.current) textRef.current.textContent = g.text;
-    if (mEmojiRef.current) mEmojiRef.current.textContent = g.emoji;
-    if (mTextRef.current) mTextRef.current.textContent = g.text;
+  useEffect(() => {
+    setOpen(false);
+    setQuery("");
+  }, [pathname]);
 
-    const greetW = greet.offsetWidth;
-    const linksW = links.offsetWidth;
-
-    const showLinks = () => {
-      links.style.pointerEvents = "auto";
-      greet.style.pointerEvents = "none";
-    };
-
-    if (reduce) {
-      navWidth.set(linksW);
-      navOpacity.set(1);
-      greetOpacity.set(0);
-      linksOpacity.set(1);
-      mGreetOpacity.set(0);
-      mBrandOpacity.set(1);
-      showLinks();
-      return;
-    }
-
-    const running: { stop: () => void }[] = [];
-
-    // Pill expands to the greeting, fading up from nothing.
-    running.push(animate(navWidth, greetW, { duration: 0.8, delay: 0.15, ease: EASE }));
-    running.push(animate(navOpacity, 1, { duration: 0.5, delay: 0.15 }));
-
-    // As the name lands, swap greeting → links and re-size the pill.
-    const timer = setTimeout(() => {
-      running.push(animate(greetOpacity, 0, { duration: 0.3, ease: "easeOut" }));
-      running.push(animate(mGreetOpacity, 0, { duration: 0.3, ease: "easeOut" }));
-      running.push(animate(navWidth, linksW, { duration: 0.8, ease: EASE }));
-      running.push(animate(linksOpacity, 1, { duration: 0.5, delay: 0.2 }));
-      running.push(animate(mBrandOpacity, 1, { duration: 0.5, delay: 0.2 }));
-      showLinks();
-    }, T_NAV_SWAP * 1000);
-
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
     return () => {
-      clearTimeout(timer);
-      running.forEach((r) => r.stop());
+      document.body.style.overflow = "";
     };
-    // MotionValues are stable refs; only the motion preference re-runs this.
-  }, [reduce, navWidth, navOpacity, greetOpacity, linksOpacity, mGreetOpacity, mBrandOpacity]);
+  }, [open]);
+
+  const suggestions = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return PROJECTS.slice(0, 4);
+    return PROJECTS.filter((project) =>
+      `${project.title} ${project.kicker} ${project.tags.join(" ")}`.toLowerCase().includes(normalized),
+    ).slice(0, 5);
+  }, [query]);
+
+  function submitSearch(event: FormEvent) {
+    event.preventDefault();
+    if (suggestions[0]) router.push(`/projects/${suggestions[0].slug}`);
+  }
+
+  function toggleTheme() {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    document.documentElement.dataset.theme = next;
+    window.localStorage.setItem("portfolio-theme", next);
+  }
 
   return (
     <>
-      {/* ---- Left flank: monogram logo → home (awrs.me top-5 left-[18%]) ---- */}
-      <Link
-        href="/"
-        className="group hidden md:flex fixed top-5 left-[18%] z-50 items-center"
-        aria-label="Home"
-      >
-        <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-primary to-accent text-sm font-bold text-white shadow-lg shadow-primary/30 transition-transform duration-300 group-hover:scale-110">
-          PS
-        </span>
+      <Link href="/" className="fixed left-5 top-5 z-50 grid h-10 w-10 place-items-center rounded-xl border border-border bg-navbar text-xs font-black tracking-[-0.08em] text-foreground shadow-lg backdrop-blur-xl md:left-[8vw]" aria-label="Puneet Saxena home">
+        PS
       </Link>
 
-      {/* ---- Right flank: chain-link button → overlay nav (awrs.me exact) ---- */}
-      <button
-        onClick={() => setMenuOpen(true)}
-        className="hidden md:flex fixed top-5 right-[18%] z-50 h-10 w-10 items-center justify-center rounded-xl bg-navbar backdrop-blur-xl border border-border text-muted hover:text-foreground hover:scale-105 transition-all cursor-pointer"
-        aria-label="Open navigation"
-      >
-        <LinkIcon className="w-[18px] h-[18px]" />
-      </button>
-
-      {/* ---- Center: floating pill — greeting, then page links ---- */}
       <motion.nav
-        style={{ width: navWidth, opacity: navOpacity }}
-        className="floating-nav hidden md:block fixed top-4 inset-x-0 mx-auto z-40 h-12 overflow-hidden rounded-full bg-navbar backdrop-blur-xl border border-border transition-shadow duration-300"
-        aria-label="Primary"
+        initial={reduce ? false : { opacity: 0, width: 0 }}
+        animate={{ opacity: 1, width: ready ? "auto" : 190 }}
+        transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+        className="fixed left-1/2 top-4 z-50 hidden h-12 -translate-x-1/2 overflow-hidden rounded-full border border-border bg-navbar shadow-xl backdrop-blur-xl md:block"
+        aria-label="Primary navigation"
       >
-        {/* greeting panel */}
-        <motion.div
-          ref={greetRef}
-          style={{ opacity: greetOpacity }}
-          className="absolute left-0 top-0 flex h-12 w-max select-none items-center justify-center gap-2.5 px-8"
-          aria-hidden
-        >
-          <span ref={emojiRef} className="text-base" />
-          <span
-            ref={textRef}
-            className="whitespace-nowrap text-sm font-medium text-foreground"
-          />
-        </motion.div>
-
-        {/* links panel */}
-        <motion.div
-          ref={linksRef}
-          style={{ opacity: linksOpacity, pointerEvents: "none" }}
-          className="absolute left-0 top-0 flex h-12 w-max items-center px-1.5"
-        >
-          <div className="relative flex items-center gap-1 px-1">
-            {LINKS.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                aria-current={isActive(l.href) ? "page" : undefined}
-                className={`nav-item relative z-10 whitespace-nowrap rounded-full px-5 py-1.5 text-sm font-medium transition-colors duration-200 ${
-                  isActive(l.href)
-                    ? "text-foreground"
-                    : "text-muted hover:text-foreground"
-                }`}
-              >
-                {isActive(l.href) && (
-                  <>
-                    {/* the light on the pill's top edge, sitting above the
-                        selected page name — slides to whichever page you pick */}
-                    <motion.span
-                      layoutId="nav-light"
-                      className="pointer-events-none absolute -top-[9px] left-1 right-1 h-[2px] rounded-full bg-gradient-to-r from-transparent via-primary-bright to-transparent shadow-[0_0_12px_2px_rgba(212,84,126,0.55)]"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    />
-                    <motion.span
-                      layoutId="nav-active-pill"
-                      className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-white/[0.08] ring-1 ring-white/[0.08]"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    />
-                  </>
-                )}
-                {l.label}
-              </Link>
-            ))}
-          </div>
-        </motion.div>
+        <AnimatePresence mode="wait" initial={false}>
+          {!ready ? (
+            <motion.div key="greeting" exit={{ opacity: 0, y: -8 }} className="flex h-full w-[190px] items-center justify-center gap-2 text-sm text-foreground">
+              <span className="text-primary">{hello.icon}</span>
+              <span>{hello.label}</span>
+            </motion.div>
+          ) : (
+            <motion.div key="links" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex h-full items-center gap-1 px-1.5">
+              {PAGES.map((page) => {
+                const active = page.href === "/" ? pathname === "/" : pathname.startsWith(page.href);
+                return (
+                  <Link key={page.href} href={page.href} className={`relative rounded-full px-4 py-2 text-sm transition-colors ${active ? "text-foreground" : "text-muted hover:text-foreground"}`}>
+                    {active && <motion.span layoutId="active-nav" className="absolute inset-0 -z-10 rounded-full bg-foreground/[0.08] ring-1 ring-foreground/10" />}
+                    {page.label}
+                  </Link>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.nav>
 
-      {/* ---- Mobile: greeting bar → brand label (awrs mobile-greeting-bar) ---- */}
-      <div className="md:hidden fixed top-4 left-1/2 -translate-x-1/2 z-40 w-[200px]">
-        <button
-          onClick={() => setMenuOpen(true)}
-          className="relative flex h-12 w-full items-center justify-center rounded-full bg-navbar backdrop-blur-xl border border-border cursor-pointer select-none"
-          aria-label="Open menu"
-          aria-expanded={menuOpen}
-        >
-          <motion.span
-            style={{ opacity: mGreetOpacity }}
-            className="absolute inset-0 flex items-center justify-center gap-2.5"
-            aria-hidden
-          >
-            <span ref={mEmojiRef} className="text-base" />
-            <span
-              ref={mTextRef}
-              className="whitespace-nowrap text-sm font-medium text-foreground"
-            />
-          </motion.span>
-          <motion.span
-            style={{ opacity: mBrandOpacity }}
-            className="absolute inset-0 flex items-center justify-center gap-2.5"
-          >
-            <span className="grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-primary to-accent text-[11px] font-bold text-white">
-              PS
-            </span>
-            <span className="whitespace-nowrap text-sm font-medium text-foreground">
-              Puneet<span className="text-primary">.</span>
-            </span>
-          </motion.span>
-        </button>
-      </div>
+      <button onClick={() => setOpen(true)} className="fixed right-5 top-5 z-50 grid h-10 w-10 place-items-center rounded-xl border border-border bg-navbar text-muted shadow-lg backdrop-blur-xl transition hover:scale-105 hover:text-foreground md:right-[8vw]" aria-label="Open navigation">
+        <MenuMark />
+      </button>
 
-      {/* ---- Full-screen overlay menu (right button / mobile bar) ---- */}
+      <button onClick={() => setOpen(true)} className="fixed left-1/2 top-4 z-40 flex h-12 -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-navbar px-6 text-sm text-foreground shadow-xl backdrop-blur-xl md:hidden" aria-label="Open navigation">
+        <span className="text-primary">{hello.icon}</span>
+        <span>{ready ? "Explore" : hello.label}</span>
+      </button>
+
       <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-background/90 backdrop-blur-2xl"
-            onClick={() => setMenuOpen(false)}
-          >
-            <button
-              onClick={() => setMenuOpen(false)}
-              className="absolute top-5 right-6 grid h-10 w-10 place-items-center rounded-xl border border-border bg-card/60 text-foreground"
-              aria-label="Close menu"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-                <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
-              </svg>
-            </button>
-            <motion.ul
-              initial="hidden"
-              animate="show"
-              variants={{ show: { transition: { staggerChildren: 0.06 } } }}
-              className="flex flex-col items-center gap-2"
-            >
-              {LINKS.map((l) => (
-                <motion.li
-                  key={l.href}
-                  variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE } } }}
-                >
-                  <Link
-                    href={l.href}
-                    onClick={() => setMenuOpen(false)}
-                    className={`font-display text-4xl font-bold transition-colors ${
-                      isActive(l.href) ? "text-primary" : "text-foreground hover:text-primary"
-                    }`}
-                  >
-                    {l.label}
-                  </Link>
-                </motion.li>
-              ))}
-            </motion.ul>
+        {open && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.28 }} className="fixed inset-0 z-[70] overflow-y-auto bg-background/95 backdrop-blur-2xl">
+            <div className="mx-auto min-h-full max-w-6xl px-6 py-6">
+              <div className="flex items-center justify-between">
+                <Link href="/" className="text-sm font-black tracking-tight text-foreground">PUNEET<span className="text-primary">.</span></Link>
+                <div className="flex items-center gap-2">
+                  <button onClick={toggleTheme} className="rounded-full border border-border px-4 py-2 text-sm text-muted transition hover:text-foreground" aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>
+                    {theme === "dark" ? "Light mode" : "Dark mode"}
+                  </button>
+                  <button onClick={() => setOpen(false)} className="grid h-10 w-10 place-items-center rounded-full border border-border text-xl text-foreground" aria-label="Close navigation">×</button>
+                </div>
+              </div>
+
+              <div className="grid gap-12 pb-10 pt-14 lg:grid-cols-[1.25fr_.75fr] lg:pt-20">
+                <div>
+                  <p className="font-mono text-xs uppercase tracking-[0.28em] text-primary">Pages</p>
+                  <div className="mt-5 divide-y divide-border border-y border-border">
+                    {PAGES.map((page, index) => (
+                      <motion.div key={page.href} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.045 }}>
+                        <Link href={page.href} className="group flex items-center gap-5 py-4 md:py-5">
+                          <span className="font-mono text-xs text-faint">{page.index}</span>
+                          <span className="font-display text-4xl font-bold tracking-tight text-foreground transition group-hover:translate-x-2 group-hover:text-primary md:text-6xl">{page.label}</span>
+                          <span className="ml-auto text-2xl text-faint transition group-hover:text-primary">↗</span>
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-8">
+                  <div>
+                    <p className="font-mono text-xs uppercase tracking-[0.28em] text-primary">Jump to a project</p>
+                    <form onSubmit={submitSearch} className="mt-4">
+                      <label className="sr-only" htmlFor="project-search">Search projects</label>
+                      <input id="project-search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by title or technology…" className="w-full rounded-2xl border border-border bg-card/60 px-4 py-3.5 text-base text-foreground outline-none transition placeholder:text-faint focus:border-primary" />
+                    </form>
+                    <div className="mt-3 space-y-1">
+                      {suggestions.map((project) => (
+                        <Link key={project.slug} href={`/projects/${project.slug}`} className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-muted transition hover:bg-card hover:text-foreground">
+                          <span>{project.title}</span>
+                          <span className="font-mono text-[10px] uppercase tracking-wider text-faint">{project.kicker}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-6 border-t border-border pt-6">
+                    <div>
+                      <p className="font-mono text-xs uppercase tracking-[0.24em] text-faint">Connect</p>
+                      <div className="mt-3 flex flex-col gap-2">
+                        {SOCIALS.map((social) => <a key={social.label} href={social.href} target="_blank" rel="noopener noreferrer" className="text-sm text-muted hover:text-primary">{social.label} ↗</a>)}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="font-mono text-xs uppercase tracking-[0.24em] text-faint">Legal</p>
+                      <div className="mt-3 flex flex-col gap-2">
+                        <Link href="/privacy" className="text-sm text-muted hover:text-primary">Privacy</Link>
+                        <Link href="/terms" className="text-sm text-muted hover:text-primary">Terms</Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

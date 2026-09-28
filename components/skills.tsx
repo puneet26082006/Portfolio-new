@@ -21,7 +21,7 @@ import { Reveal, staggerContainer, staggerItem } from "./ui";
 
 type Skill = { name: string; color: string; icon?: IconType; mono?: string };
 
-/* Flat brand-icon grid — ported 1:1 from awrs.me's #skills section:
+/* Flat brand-icon grid with a brand-colour hover wash:
    grid-cols-3 → lg:grid-cols-6, each a bordered `skill-item` card whose
    own `--skill-color` drives a brand-tint fill on hover (icon/name ride
    above via z-[1], card is overflow-hidden). Colours are each tool's real
@@ -71,7 +71,7 @@ export function Skills() {
           </Reveal>
         </div>
 
-        {/* Skill grid — exact awrs.me columns + gap */}
+        {/* Responsive skill grid */}
         <motion.div
           variants={staggerContainer}
           initial="hidden"

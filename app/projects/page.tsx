@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { ProjectCard } from "@/components/project-card";
 import { PROJECTS } from "@/lib/projects";
+import { PROJECTS as CASE_STUDIES } from "@/lib/content";
+import { CaseStudyCard } from "@/components/case-study-card";
 
 export const metadata: Metadata = {
-  title: "Projects — Puneet Saxena",
+  title: "Projects",
   description: "Explore Pixora AI, Honey Comb, and Smart Flow AI — AI products by Puneet Saxena.",
 };
 
@@ -18,6 +20,12 @@ export default function ProjectsPage() {
       <div className="projects-gallery">
         {PROJECTS.map((project, index) => <ProjectCard key={project.id} project={project} index={index} />)}
       </div>
+      <section className="mt-16" aria-labelledby="additional-projects">
+        <h2 id="additional-projects" className="font-ui mb-6 text-2xl font-bold">More projects</h2>
+        <div className="grid gap-6 lg:grid-cols-2">
+          {CASE_STUDIES.filter(project => project.slug === "fair-relief-routing" || project.slug === "virtual-herbal-garden").map((project, index) => <CaseStudyCard key={project.slug} project={project} index={index} />)}
+        </div>
+      </section>
       <a href="https://github.com/puneet26082006" target="_blank" rel="noopener noreferrer" className="mt-10 inline-flex items-center gap-2 text-sm text-muted hover:text-foreground">More experiments on GitHub <span aria-hidden="true">↗</span></a>
     </main>
   );

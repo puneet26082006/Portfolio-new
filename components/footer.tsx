@@ -1,14 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 const NAV = [
-  { label: "About", href: "#about" },
-  { label: "Coding", href: "#coding" },
-  { label: "Skills", href: "#skills" },
-  { label: "Projects", href: "#projects" },
-  { label: "Achievements", href: "#achievements" },
-  { label: "Education", href: "#education" },
+  { label: "Home", href: "/" },
+  { label: "Projects", href: "/projects" },
+  { label: "Journal", href: "/blog" },
+  { label: "The Wall", href: "/wall" },
+  { label: "Contact", href: "/contact" },
+  { label: "Privacy", href: "/privacy" },
 ];
 
 const SOCIALS = [
@@ -43,14 +44,14 @@ export function Footer() {
         <div className="grid gap-12 md:grid-cols-[1.5fr_1fr_1fr]">
           {/* Brand */}
           <div>
-            <a href="#top" className="inline-flex items-center gap-3">
+            <Link href="/" className="inline-flex items-center gap-3">
               <span className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-primary to-accent font-display text-lg font-black text-white">
                 PS
               </span>
               <span className="font-display text-xl font-bold text-foreground">
                 Puneet Saxena
               </span>
-            </a>
+            </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted">
               AI &amp; Data Science undergrad, full-stack developer and competitive
               programmer. Building useful things, one problem at a time.
@@ -82,12 +83,12 @@ export function Footer() {
             <ul className="space-y-2.5">
               {NAV.map((n) => (
                 <li key={n.label}>
-                  <a
+                  <Link
                     href={n.href}
                     className="text-sm text-muted transition-colors hover:text-primary"
                   >
                     {n.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -120,15 +121,15 @@ export function Footer() {
           <p className="text-sm text-faint">
             © {2026} Puneet Saxena. Built with Next.js &amp; Tailwind CSS.
           </p>
-          <a
-            href="#top"
+          <Link
+            href="/"
             className="group inline-flex items-center gap-2 text-sm text-muted transition-colors hover:text-primary"
           >
-            Back to top
+            Return home
             <span className="grid h-7 w-7 place-items-center rounded-full border border-border transition-all group-hover:-translate-y-0.5 group-hover:border-primary">
               ↑
             </span>
-          </a>
+          </Link>
         </div>
       </div>
     </footer>

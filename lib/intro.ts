@@ -1,19 +1,6 @@
 /* ------------------------------------------------------------------ *
- * awrs.me intro timeline — extracted verbatim from their bundled Hero
- * component (expc_08u~9bq9d2pze.js) and converted from GSAP's relative
- * timeline positions into absolute delays for framer-motion.
- *
- * Their source:
- *   gsap.timeline({defaults:{ease:"power3.out"}})
- *     .fromTo(".hero-marquee",      {opacity:0},                                  {opacity:1,duration:1,ease:"power2.out"})
- *     .fromTo(".hero-greeting",     {y:30,opacity:0,filter:"blur(8px)"},          {y:0,opacity:1,filter:"blur(0px)",duration:.7},                              "-=0.6")
- *     .fromTo(".hero-greeting-line",{scaleX:0,opacity:0},                         {scaleX:1,opacity:1,duration:.5,ease:"power2.out"},                          "-=0.2")
- *     .fromTo(".hero-char",         {y:60,opacity:0,rotationX:90,filter:"blur(4px)"},{y:0,opacity:1,rotationX:0,filter:"blur(0px)",duration:.5,stagger:.04,ease:"back.out(1.7)"},"-=0.2")
- *     .fromTo(".hero-tagline",      {y:20,opacity:0,filter:"blur(6px)"},          {y:0,opacity:1,filter:"blur(0px)",duration:.7},                              "-=0.3")
- *     .fromTo(".hero-particle",     {opacity:0},                                  {opacity:1,duration:.8,stagger:.05},                                         "-=0.4")
- *
- * GSAP appends each tween at (previous timeline end + offset), so the
- * absolute start times below are the resolved positions of that chain.
+ * Shared intro timings for the portfolio's greeting, name, tagline, ribbons,
+ * and quiet background particles.
  * ------------------------------------------------------------------ */
 
 export const NAME = "Puneet Saxena";
@@ -37,8 +24,7 @@ export const T_TAGLINE = T_NAME_END - 0.3;
 export const T_PARTICLES = T_TAGLINE + 0.7 - 0.4;
 
 /**
- * The moment the floating nav swaps its greeting pill for the page links —
- * awrs.me does this as the name lands, so the two reads as one motion.
+ * The moment the floating nav swaps its greeting pill for page links.
  */
 export const T_NAV_SWAP = T_NAME_END + 0.1;
 

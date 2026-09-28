@@ -9,12 +9,12 @@ import type { Project } from "@/lib/projects";
 export function ProjectCard({ project, index }: { project: Project; index: number }) {
   const ref = useRef<HTMLElement>(null);
   const cursor = useRef<HTMLDivElement>(null);
+  const cursorDisc = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const [hovered, setHovered] = useState(false);
   const pathId = `project-cursor-${useId().replaceAll(":", "")}`;
   const pointer = useRef<{ x: number; y: number } | null>(null);
   const displayedPointer = useRef<{ x: number; y: number } | null>(null);
-  const cursorDisc = useRef<HTMLDivElement>(null);
   const cursorTween = useRef<gsap.core.Tween | null>(null);
   const href = project.live ?? project.github!;
 
@@ -44,7 +44,7 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
         return;
       }
       // Ease in viewport space, then compensate for the moving card every frame.
-      // Visibility animates a separate element, so it cannot stop pointer tracking.
+      // Animate visibility separately so it cannot cancel pointer tracking.
       const blend = 1 - Math.exp(-Math.min(deltaMs, 64) / 55);
       displayed.x += (point.x - displayed.x) * blend;
       displayed.y += (point.y - displayed.y) * blend;
@@ -83,69 +83,6 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
     displayedPointer.current = null;
     cursorTween.current?.kill();
     if (cursorDisc.current) cursorTween.current = gsap.to(cursorDisc.current, { scale: 0, opacity: 0, duration: 0.2, ease: "power2.in" });
-  }
-  return () => {
-      positionX.current?.tween.kill();
-      positionY.current?.tween.kill();
-      cursorTween.current?.kill();
-      positionX.current = null;
-      positionY.current = null;
-    };
-  }, [reduce]);
-
-  useEffect(() => {
-    if (!hovered || reduce) return;
-    let previousX = -1;
-    let previousY = -1;
-    const follow = () => {
-      const point = pointer.current;
-      const bounds = ref.current?.getBoundingClientRect();
-      if (!point || !bounds) return;
-      if (point.x < bounds.left || point.x > bounds.right || point.y < bounds.top || point.y > bounds.bottom) {
-        pointer.current = null;
-        setHovered(false);
-        if (cursor.current) gsap.to(cursor.current, { scale: 0, opacity: 0, duration: 0.2, ease: "power2.in", overwrite: true });
-        return;
-      }
-      const x = point.x - bounds.left;
-      const y = point.y - bounds.top;
-      if (Math.abs(x - previousX) > 0.1) { positionX.current?.(x); previousX = x; }
-      if (Math.abs(y - previousY) > 0.1) { positionY.current?.(y); previousY = y; }
-    };
-    const hide = () => {
-      pointer.current = null;
-      setHovered(false);
-      if (cursor.current) gsap.set(cursor.current, { opacity: 0, scale: 0 });
-    };
-    gsap.ticker.add(follow);
-    window.addEventListener("blur", hide);
-    return () => { gsap.ticker.remove(follow); window.removeEventListener("blur", hide); };
-  }, [hovered, reduce]);
-
-  function move(event: PointerEvent<HTMLElement>) {
-    if (event.pointerType !== "mouse" || reduce) return;
-    pointer.current = { x: event.clientX, y: event.clientY };
-  }
-
-  function enter(event: PointerEvent<HTMLElement>) {
-    if (event.pointerType !== "mouse" || reduce || !cursor.current || !ref.current) return;
-    move(event);
-    const bounds = ref.current.getBoundingClientRect();
-    const x = event.clientX - bounds.left;
-    const y = event.clientY - bounds.top;
-    cursorTween.current?.kill();
-    gsap.set(cursor.current, { x, y, scale: 0, opacity: 1 });
-    positionX.current?.(x, x);
-    positionY.current?.(y, y);
-    cursorTween.current = gsap.to(cursor.current, { scale: 1, duration: 0.35, ease: "back.out(1.7)" });
-    setHovered(true);
-  }
-
-  function leave() {
-    setHovered(false);
-    pointer.current = null;
-    cursorTween.current?.kill();
-    if (cursor.current) cursorTween.current = gsap.to(cursor.current, { scale: 0, opacity: 0, duration: 0.2, ease: "power2.in" });
   }
 
   return (

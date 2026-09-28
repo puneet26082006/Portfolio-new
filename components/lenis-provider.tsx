@@ -6,9 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 /* ------------------------------------------------------------------ *
- * LenisProvider — buttery smooth scroll, ported 1:1 from awrs.me.
- *
- * awrs.me runs Lenis 1.3.x with { autoRaf:false, duration:1.2, expo-out
+ * LenisProvider — smooth scroll with { autoRaf:false, duration:1.2, expo-out
  * easing, touchMultiplier:1.5 } and drives lenis.raf() off a single shared
  * ticker (they use GSAP's; we use framer-motion's `frame` loop) so that
  * useScroll/useTransform read the SAME frame Lenis writes — no jitter, no

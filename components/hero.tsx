@@ -17,14 +17,13 @@ import {
 } from "@/lib/intro";
 
 /* ------------------------------------------------------------------ *
- * Diagonal marquee strips — awrs.me's `hero-marquee`, ported 1:1 from
- * their bundle. Two crossing bands sitting low in the hero: a deep-rose
+ * Diagonal marquee strips — two crossing bands sitting low in the hero: a deep-rose
  * gradient running in reverse at +4deg, and a card-coloured band at
  * -4deg. Each is left-[-20%] w-[140%] so the rotation never exposes an
  * edge, and each track holds the items tripled then repeated twice so
  * translateX(-50%) loops seamlessly.
  *
- * Their config:
+ * Motion configuration:
  *   [{angle:"4deg", reverse:true,  duration:35, topClass:"top-[75%] md:top-[85%]"},
  *    {angle:"-4deg",reverse:false, duration:40, topClass:"top-[78%] md:top-[88%]"}]
  * ------------------------------------------------------------------ */
@@ -53,7 +52,7 @@ const STRIPS = [
     className: "bg-card border-y border-border text-muted",
     items: [
       "Codeforces Pupil",
-      "CodeChef 2★",
+      "CodeChef 3★",
       "LeetCode 1600+",
       "160-Day DSA Streak",
       "Top 2% · AI India Impact Summit",
@@ -116,7 +115,7 @@ function HeroStrips({ reduce }: { reduce: boolean | null }) {
   );
 }
 
-/* awrs.me's exact 6 hero particles (top/left/right + float-slow delay). */
+/* Six low-contrast particles keep the hero active without obscuring text. */
 const PARTICLES = [
   { top: "18%", left: "12%", delay: 0 },
   { top: "25%", right: "18%", delay: 1.5 },
@@ -126,7 +125,7 @@ const PARTICLES = [
   { top: "55%", right: "8%", delay: 4 },
 ];
 
-// awrs.me paints one continuous gradient across the split characters.
+// Paint one continuous gradient across the split characters.
 const NAME_GRADIENT =
   "linear-gradient(to right, #a83d62, #d4547e, #e07a9c, #f5b8cc)";
 
@@ -155,8 +154,8 @@ export function Hero() {
   /* Stretch ONE gradient across the characters: chars are grouped by visual
      line (rounded offsetTop) and each line gets a single left→right gradient
      sized to that line's width. Painting per-line keeps the effect correct
-     even if the name wraps on a narrow screen. Pure DOM writes (awrs.me does
-     the same) — no state, so this never re-renders. offsetLeft is layout-based,
+     even if the name wraps on a narrow screen. Pure DOM writes avoid state
+     churn; offsetLeft is layout-based,
      so in-flight transforms don't skew it. */
   const paintGradient = useCallback(() => {
     const h1 = nameRef.current;
@@ -195,7 +194,7 @@ export function Hero() {
       id="top"
       className="relative -mt-20 flex min-h-screen items-center justify-center overflow-hidden pt-20"
     >
-      {/* Single soft rose glow — awrs.me's
+      {/* Single soft rose glow —
           radial-gradient(circle, primary-glow 0%, transparent 70%) */}
       <div
         className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[min(860px,120vw)] w-[min(860px,120vw)] -translate-x-1/2 -translate-y-1/2"

@@ -75,10 +75,9 @@ export function About() {
           <Reveal>
             <p className="text-lg leading-relaxed text-muted">
               I&apos;m <span className="text-foreground">Puneet Saxena</span> — a
-              competitive programmer (Pupil on Codeforces, 2★ on CodeChef) and
-              full-stack developer with{" "}
-              <span className="text-foreground">300+ DSA problems</span> solved across
-              platforms. I build scalable web applications and AI-powered products with{" "}
+              competitive programmer (Pupil on Codeforces, 3★ on CodeChef) and
+              full-stack developer with hundreds of DSA problems solved across
+              platforms. I build scalable web applications, optimization systems, and AI-powered products with{" "}
               <span className="text-primary">React, Node.js and TypeScript</span>,
               wiring in tools like Supabase, Cloudinary and n8n to ship real features fast.
             </p>
