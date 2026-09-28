@@ -7,7 +7,7 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import { useRef, type ReactNode } from "react";
+import { useRef } from "react";
 import type { IconType } from "react-icons";
 import {
   SiCodechef,
@@ -95,39 +95,6 @@ const PROFILES: Profile[] = [
 const EASE_POWER3: [number, number, number, number] = [0.215, 0.61, 0.355, 1];
 
 /* ------------------------------------------------------------------ *
- * ExitBlur — awrs.me's signature "content softens as it leaves the top".
- * Sharp through the reading zone; gentle 6px blur only as the block
- * exits upward. Scroll MotionValues only — never re-renders.
- * ------------------------------------------------------------------ */
-function ExitBlur({
-  children,
-  className,
-  reduce,
-}: {
-  children: ReactNode;
-  className?: string;
-  reduce: boolean | null;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start 0.2", "end start"],
-  });
-  const filter = useTransform(scrollYProgress, [0, 1], ["blur(0px)", "blur(6px)"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.85, 1], [1, 1, 0]);
-
-  return (
-    <motion.div
-      ref={ref}
-      className={className}
-      style={reduce ? undefined : { filter, opacity, willChange: "filter, opacity" }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-/* ------------------------------------------------------------------ *
  * ProfileEntry — one node of the experience-style timeline, ported 1:1
  * from awrs.me's Experience component: bare content (no card box),
  * first entry on the LEFT and alternating, text stacked exactly like
@@ -170,7 +137,7 @@ function ProfileEntry({ p, index }: { p: Profile; index: number }) {
         </span>
       </div>
 
-      <ExitBlur reduce={reduce} className={isLeft ? undefined : "md:col-start-2"}>
+      <div className={isLeft ? undefined : "md:col-start-2"}>
         {/* Entrance: down → up (y 40), power3-out, once — awrs.me exact params */}
         <motion.a
           href={p.href}
@@ -222,7 +189,7 @@ function ProfileEntry({ p, index }: { p: Profile; index: number }) {
             </span>
           </span>
         </motion.a>
-      </ExitBlur>
+      </div>
     </li>
   );
 }

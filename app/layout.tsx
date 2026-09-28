@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { Nav } from "../components/nav";
+import { ScrollBlur } from "../components/scroll-blur";
 import { LenisProvider } from "../components/lenis-provider";
 
 const geistSans = Geist({
@@ -72,6 +73,7 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-background text-foreground">
         <LenisProvider>
+          <ScrollBlur />
           <Nav />
           {children}
         </LenisProvider>

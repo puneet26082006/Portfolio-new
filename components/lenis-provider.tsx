@@ -51,9 +51,10 @@ export function LenisProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Snap to top on route change (single-page today, but keeps behaviour correct).
+  // Preserve direct section links while resetting ordinary route navigation.
   useEffect(() => {
-    lenisRef.current?.scrollTo(0, { immediate: true });
+    const target = document.getElementById(window.location.hash.slice(1));
+    lenisRef.current?.scrollTo(target ?? 0, { immediate: true });
   }, [pathname]);
 
   return <>{children}</>;

@@ -1,150 +1,110 @@
 "use client";
 
-import { Reveal, SectionHeading, TiltCard } from "./ui";
+import Link from "next/link";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useEffect, useRef, type FocusEvent } from "react";
+import { PROJECTS } from "@/lib/projects";
+import { ProjectCard } from "./project-card";
 
-type Project = {
-  n: string;
-  title: string;
-  category: string;
-  badge?: string;
-  description: string;
-  tags: string[];
-  gradient: string;
-  glyph: string;
-  links: { label: string; href: string; primary?: boolean }[];
-};
-
-const PROJECTS: Project[] = [
-  {
-    n: "01",
-    title: "Pixora AI",
-    category: "AI Web App · Background Remover",
-    description:
-      "An AI-powered background remover with a modern, responsive React + Tailwind interface. Integrates the ClipDrop API for one-click removal, Supabase for auth, Cloudinary for image storage, and Razorpay for subscription billing — with Node.js and n8n orchestrating credit handling and automated image processing.",
-    tags: ["React.js", "Tailwind CSS", "ClipDrop API", "Supabase", "Cloudinary", "Razorpay", "n8n"],
-    gradient: "from-[#d4547e] to-[#f59e0b]",
-    glyph: "✦",
-    links: [
-      { label: "Live Demo", href: "https://tanstack-start-app.puneetsaxena168.workers.dev/", primary: true },
-    ],
-  },
-  {
-    n: "02",
-    title: "Honey Comb",
-    category: "AI · Scam Detection Platform",
-    badge: "Top 2% · AI India Impact Summit",
-    description:
-      "An AI-powered platform that identifies and analyzes potential honey-trap and fraudulent scam activity, with real-time detection to keep users safe. Built as a hackathon project and selected among the Top 2% of teams at the AI India Impact Summit for innovation and impact.",
-    tags: ["AI Analysis", "Real-time Detection", "Web", "Hackathon"],
-    gradient: "from-[#a83d62] to-[#d4547e]",
-    glyph: "⬡",
-    links: [
-      { label: "View Code", href: "https://github.com/puneet26082006/Honey-Comb-Scam-detection-", primary: true },
-    ],
-  },
-];
 
 export function Projects() {
+  const section = useRef<HTMLElement>(null);
+  const track = useRef<HTMLDivElement>(null);
+  const heading = useRef<HTMLDivElement>(null);
+  const scrollTween = useRef<gsap.core.Tween | null>(null);
+
+  useEffect(() => {
+    const root = section.current;
+    const row = track.current;
+    if (!root || !row) return;
+    gsap.registerPlugin(ScrollTrigger);
+    const media = gsap.matchMedia();
+    media.add("(prefers-reduced-motion: no-preference)", () => {
+      if (!heading.current) return;
+      gsap.fromTo(heading.current.children, { y: 30, opacity: 0 }, {
+        y: 0, opacity: 1, duration: 0.8, stagger: 0.15, ease: "power3.out",
+        scrollTrigger: { trigger: heading.current, start: "top 85%", once: true },
+      });
+    });
+    let refreshFrame = 0;
+    let disposed = false;
+    // Extracted FeaturedProjects behavior: native sticky, measured overflow,
+    // top/top -> bottom/bottom, linear translation, one-second GSAP scrub.
+    media.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
+      root.dataset.horizontal = "true";
+      const travel = () => Math.max(0, row.scrollWidth - document.documentElement.clientWidth);
+      const size = () => { root.style.height = `${window.innerHeight + travel()}px`; };
+      size();
+      const tween = gsap.to(row, {
+        x: () => -travel(),
+        ease: "none",
+        scrollTrigger: {
+          trigger: root,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1,
+          invalidateOnRefresh: true,
+          onRefresh: size,
+        },
+      });
+      scrollTween.current = tween;
+      ScrollTrigger.addEventListener("refreshInit", size);
+      const observer = new ResizeObserver(() => {
+        cancelAnimationFrame(refreshFrame);
+        refreshFrame = requestAnimationFrame(() => ScrollTrigger.refresh());
+      });
+      observer.observe(row);
+      ScrollTrigger.refresh();
+      return () => {
+        observer.disconnect();
+        cancelAnimationFrame(refreshFrame);
+        ScrollTrigger.removeEventListener("refreshInit", size);
+        scrollTween.current = null;
+        root.dataset.horizontal = "false";
+        root.style.removeProperty("height");
+      };
+    });
+    document.fonts.ready.then(() => { if (!disposed) ScrollTrigger.refresh(); });
+    return () => { disposed = true; media.revert(); };
+  }, []);
+  function revealFocusedCard(event: FocusEvent<HTMLDivElement>) {
+    const root = section.current;
+    const row = track.current;
+    if (!root || !row || root.dataset.horizontal !== "true") return;
+    const card = (event.target as HTMLElement).closest<HTMLElement>(".project-track-item");
+    if (!card) return;
+    const bounds = card.getBoundingClientRect();
+    if (bounds.left >= 20 && bounds.right <= window.innerWidth - 20) return;
+    const inset = parseFloat(getComputedStyle(row).paddingLeft);
+    const travel = Math.min(row.scrollWidth - document.documentElement.clientWidth, Math.max(0, card.offsetLeft - inset));
+    window.scrollTo({ top: root.getBoundingClientRect().top + window.scrollY + travel, behavior: "instant" });
+    ScrollTrigger.update();
+    scrollTween.current?.scrollTrigger?.getTween()?.progress(1);
+    const viewport = root.querySelector<HTMLElement>(".projects-sticky");
+    if (viewport) viewport.scrollLeft = 0;
+  }
+
   return (
-    <section
-      id="projects"
-      className="relative scroll-mt-24 py-24 md:py-32"
-    >
-      <div className="mx-auto max-w-6xl px-6">
-        <SectionHeading eyebrow="Featured Work" title={<>Projects that ship</>} />
-
-        <div className="space-y-8">
-          {PROJECTS.map((p, i) => (
-            <Reveal key={p.title} delay={i * 0.05}>
-              <TiltCard className="glow-border group grid overflow-hidden rounded-[2rem] border border-border bg-card/60 md:grid-cols-2">
-                {/* Visual panel */}
-                <div
-                  className={`relative order-1 flex min-h-[220px] items-center justify-center overflow-hidden bg-gradient-to-br ${p.gradient} md:min-h-[340px] ${
-                    i % 2 === 1 ? "md:order-2" : ""
-                  }`}
-                >
-                  <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(circle_at_1px_1px,#fff_1px,transparent_0)] [background-size:22px_22px]" />
-                  <span className="pointer-events-none absolute -right-6 -top-8 font-display text-[10rem] font-black leading-none text-white/15">
-                    {p.n}
-                  </span>
-                  <span className="text-7xl text-white/90 drop-shadow-lg transition-transform duration-500 group-hover:scale-110">
-                    {p.glyph}
-                  </span>
-                  <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-full bg-black/25 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
-                    <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                    Open to Explore
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="order-2 flex flex-col justify-center gap-4 p-7 md:p-10">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <span className="font-mono text-sm text-primary">{p.category}</span>
-                    {p.badge && (
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-xs font-medium text-accent-soft">
-                        🏆 {p.badge}
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="font-display text-3xl font-bold text-foreground md:text-4xl">
-                    {p.title}
-                  </h3>
-                  <p className="leading-relaxed text-muted">{p.description}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {p.tags.map((t) => (
-                      <span
-                        key={t}
-                        className="rounded-full border border-border bg-background/60 px-3 py-1 text-xs text-muted"
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-3">
-                    {p.links.map((l) => (
-                      <a
-                        key={l.label}
-                        href={l.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={
-                          l.primary
-                            ? "inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-accent px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
-                            : "inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-primary/50 hover:text-primary"
-                        }
-                      >
-                        {l.label}
-                        <span>↗</span>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </TiltCard>
-            </Reveal>
-          ))}
-        </div>
-
-        {/* More on GitHub */}
-        <Reveal delay={0.1}>
-          <a
-            href="https://github.com/puneet26082006"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="glow-border group mt-8 flex items-center justify-between rounded-[2rem] border border-dashed border-border bg-card/40 p-7 transition-colors hover:border-primary/40 md:p-10"
-          >
-            <div>
-              <h3 className="font-display text-2xl font-bold text-foreground">
-                More on GitHub
-              </h3>
-              <p className="mt-1 text-muted">
-                Explore experiments, contest solutions and works-in-progress.
-              </p>
+    <section ref={section} id="projects" className="featured-projects" aria-labelledby="featured-projects-title">
+      <div className="projects-sticky">
+        <div className="projects-content">
+          <div ref={heading} className="projects-heading">
+              <h2 id="featured-projects-title">Featured Projects</h2>
+              <span className="projects-heading-line" />
+          </div>
+          <div ref={track} className="projects-track" onFocusCapture={revealFocusedCard}>
+            {PROJECTS.map((project, index) => <div className="project-track-item" key={project.id}><ProjectCard project={project} index={index} /></div>)}
+            <div className="project-track-item">
+              <Link href="/projects" className="projects-more">
+                <span className="projects-more-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="7" height="7" rx="2" /><rect x="14" y="3" width="7" height="7" rx="2" /><rect x="3" y="14" width="7" height="7" rx="2" /><rect x="14" y="14" width="7" height="7" rx="2" /></svg></span>
+                <div><h3>View All Projects</h3><p>See the full collection</p></div>
+                <span className="projects-more-button">Explore <span aria-hidden="true">→</span></span>
+              </Link>
             </div>
-            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full border border-border text-2xl text-foreground transition-all duration-300 group-hover:border-primary group-hover:text-primary">
-              →
-            </span>
-          </a>
-        </Reveal>
+            <div className="projects-end-space" aria-hidden="true" />
+          </div>
+        </div>
       </div>
     </section>
   );
