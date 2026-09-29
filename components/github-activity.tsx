@@ -126,14 +126,14 @@ export function GitHubActivity() {
           {activity ? (
             <>
               <div
-                className="calendar-scroll"
-                tabIndex={0}
+                className="contribution-calendar"
                 role="region"
-                aria-label="GitHub contribution calendar, scroll horizontally to explore"
+                aria-label="GitHub contribution calendar"
               >
                 <svg
-                  width={width}
-                  height="143"
+                  viewBox={`0 0 ${width} 143`}
+                  width="100%"
+                  preserveAspectRatio="xMidYMin meet"
                   role="img"
                   aria-label={total + " GitHub contributions in the last year"}
                 >

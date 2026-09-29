@@ -23,6 +23,7 @@ type Profile = {
   accent: string;
   icon: IconType;
   rank: string;
+  description: string;
   rating: number;
   ratingLabel: string;
   stats: { label: string; value: string }[];
@@ -39,11 +40,13 @@ const PROFILES: Profile[] = [
     accent: "#4d9fff",
     icon: SiCodeforces,
     rank: "Pupil",
-    rating: 1243,
+    description:
+      "Building speed and precision through regular rated rounds and algorithm practice. My best Division 3 finish is global rank 792, with 365 distinct problems solved across the platform.",
+    rating: 1375,
     ratingLabel: "Max Rating",
     stats: [
-      { label: "Solved", value: "50+" },
-      { label: "Best Div. 3 Rank", value: "#1020" },
+      { label: "Solved", value: "365" },
+      { label: "Best Div. 3 Rank", value: "#792" },
     ],
     href: "https://codeforces.com/profile/puneet26",
   },
@@ -52,11 +55,13 @@ const PROFILES: Profile[] = [
     handle: "puneet_26",
     accent: "#ec4899",
     icon: SiCodechef,
-    rank: "3★ Coder",
-    rating: 1593,
+    rank: "3★ Peak",
+    description:
+      "Reached a three-star peak through consistent Starters contests, with 141 problems solved. Placed 219th globally in Starters 238 Division 3 while sharpening implementation and problem-solving under time pressure.",
+    rating: 1613,
     ratingLabel: "Max Rating",
     stats: [
-      { label: "Solved", value: "100+" },
+      { label: "Solved", value: "141" },
       { label: "Best Div. 3 Rank", value: "#219" },
     ],
     href: "https://www.codechef.com/users/puneet_26",
@@ -67,11 +72,13 @@ const PROFILES: Profile[] = [
     accent: "#facc15",
     icon: SiLeetcode,
     rank: "Contest Rated",
-    rating: 1600,
+    description:
+      "Practicing data structures and algorithms through 368 solved problems, including 197 medium and 45 hard problems. Participated in 22 rated contests to strengthen pattern recognition and efficient implementation.",
+    rating: 1754,
     ratingLabel: "Contest Rating",
     stats: [
-      { label: "Solved", value: "200+" },
-      { label: "Focus", value: "DSA" },
+      { label: "Solved", value: "368" },
+      { label: "Rated Contests", value: "22" },
     ],
     href: "https://leetcode.com/u/_puneet26/",
   },
@@ -81,7 +88,9 @@ const PROFILES: Profile[] = [
     accent: "#22c55e",
     icon: SiGeeksforgeeks,
     rank: "160-Day Streak",
-    rating: 160,
+    description:
+      "Completed the GfG 160-day DSA challenge and solved 206 problems, reaching a coding score of 845. Building a structured foundation through daily practice, reviewing mistakes, and applying familiar patterns to new problems.",
+    rating: 206,
     ratingLabel: "Problems Solved",
     stats: [
       { label: "Challenge", value: "160 Days DSA" },
@@ -178,6 +187,9 @@ function ProfileEntry({ p, index }: { p: Profile; index: number }) {
           </p>
 
           {/* Meta — one middot-joined line (awrs tags treatment) */}
+          <p className="mt-3 text-sm leading-relaxed text-muted">
+            {p.description}
+          </p>
           <p className="mt-3 text-xs tracking-wide text-faint">
             {meta.join(" · ")}
           </p>

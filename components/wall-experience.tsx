@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
 import { FormEvent, PointerEvent, useEffect, useRef, useState } from "react";
 
 type WallNote = {
@@ -30,6 +31,8 @@ export function WallExperience() {
   const drawingRef = useRef(false);
 
   useEffect(() => {
+    // Restore browser-only notes after hydration; cancel on unmount.
+    const frame = requestAnimationFrame(() => {
     const stored = window.localStorage.getItem("puneet-wall-notes");
     if (stored) {
       try {
@@ -38,6 +41,8 @@ export function WallExperience() {
         window.localStorage.removeItem("puneet-wall-notes");
       }
     }
+    });
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   function point(event: PointerEvent<HTMLCanvasElement>) {
@@ -112,7 +117,7 @@ export function WallExperience() {
         <div className="columns-1 gap-5 sm:columns-2 lg:columns-3">
           {notes.map((note, index) => (
             <motion.figure key={note.id} initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(index, 7) * 0.04 }} className="mb-5 break-inside-avoid overflow-hidden rounded-[1.6rem] border border-white/10 p-5 text-white shadow-xl" style={{ background: `linear-gradient(145deg, ${note.color}, color-mix(in srgb, ${note.color} 72%, #09090b))` }}>
-              {note.drawing && <div className="mb-5 overflow-hidden rounded-xl bg-white"><img src={note.drawing} alt={`Doodle by ${note.name}`} className="aspect-[4/3] w-full object-contain" /></div>}
+              {note.drawing && <div className="mb-5 overflow-hidden rounded-xl bg-white"><Image src={note.drawing} width={800} height={360} unoptimized alt={`Doodle by ${note.name}`} className="aspect-[4/3] w-full object-contain" /></div>}
               <blockquote className="text-lg font-semibold leading-relaxed">{note.message}</blockquote>
               <figcaption className="mt-7 flex items-end justify-between border-t border-white/15 pt-4">
                 <span className="text-sm font-semibold">{note.name}</span>

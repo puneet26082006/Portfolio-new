@@ -25,7 +25,7 @@ export default function BlogPage() {
         </Link>
 
         <div className="mt-8 divide-y divide-border border-y border-border">
-          {posts.map((post, index) => (
+          {posts.map((post) => (
             <Link key={post.slug} href={`/blog/${post.slug}`} className="group grid gap-5 py-7 md:grid-cols-[110px_1fr_auto] md:items-center">
               <div className="font-mono text-xs uppercase tracking-wider text-faint">{post.date}<br />{post.readTime}</div>
               <div>

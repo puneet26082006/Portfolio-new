@@ -5,17 +5,73 @@ import { motion, useReducedMotion } from "framer-motion";
 import { SiReact, SiCplusplus } from "react-icons/si";
 import { ReferenceSection } from "./reference-ui";
 const ITEMS = [
-  { name: "maki", label: "Maki", x: 44, y: 32, r: 3 },
-  { name: "aizen", label: "Aizen", x: 20, y: 8, r: -4 },
-  { name: "gwen", label: "Gwen", x: 60, y: 10, r: 5 },
-  { name: "tung", label: "Tung", x: 78, y: 5, r: -3 },
-  { name: "itachi", label: "Itachi", x: 5, y: 36, r: 3 },
-  { name: "mikasa", label: "Mikasa", x: 64, y: 42, r: 4 },
-  { name: "sawako", label: "Sawako", x: 80, y: 38, r: -2 },
-  { name: "mikey", label: "Mikey", x: 48, y: 66, r: -3 },
-  { name: "yuta", label: "Yuta", x: 70, y: 72, r: 4 },
-  { name: "kora", label: "Kurapika", x: 4, y: 66, r: -5 },
-  { name: "hutao", label: "Hutao", x: 8, y: 5, r: -4 },
+  {
+    name: "maki",
+    width: 1024,
+    height: 1024,
+    label: "Maki",
+    x: 44,
+    y: 32,
+    r: 3,
+  },
+  {
+    name: "aizen",
+    width: 736,
+    height: 1104,
+    label: "Aizen",
+    x: 20,
+    y: 8,
+    r: -4,
+  },
+  { name: "gwen", width: 340, height: 582, label: "Gwen", x: 60, y: 10, r: 5 },
+  { name: "tung", width: 315, height: 315, label: "Tung", x: 78, y: 5, r: -3 },
+  {
+    name: "itachi",
+    width: 400,
+    height: 400,
+    label: "Itachi",
+    x: 5,
+    y: 36,
+    r: 3,
+  },
+  {
+    name: "mikasa",
+    width: 1080,
+    height: 1080,
+    label: "Mikasa",
+    x: 64,
+    y: 42,
+    r: 4,
+  },
+  {
+    name: "sawako",
+    width: 736,
+    height: 736,
+    label: "Sawako",
+    x: 80,
+    y: 38,
+    r: -2,
+  },
+  {
+    name: "mikey",
+    width: 736,
+    height: 736,
+    label: "Mikey",
+    x: 48,
+    y: 66,
+    r: -3,
+  },
+  { name: "yuta", width: 640, height: 621, label: "Yuta", x: 70, y: 72, r: 4 },
+  {
+    name: "kora",
+    width: 1024,
+    height: 1024,
+    label: "Kurapika",
+    x: 4,
+    y: 66,
+    r: -5,
+  },
+  { name: "hutao", width: 300, height: 300, label: "Hutao", x: 8, y: 5, r: -4 },
 ];
 export function Misc() {
   const reduced = useReducedMotion();
@@ -85,8 +141,8 @@ export function Misc() {
           >
             <Image
               src={"/misc/" + item.name + ".png"}
-              width={180}
-              height={200}
+              width={item.width}
+              height={item.height}
               alt={item.label}
               style={{ height: "auto" }}
               draggable={false}

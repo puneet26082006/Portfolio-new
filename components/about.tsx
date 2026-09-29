@@ -44,14 +44,16 @@ export function About() {
             with thoughtful product development.
           </p>
         </Spotlight>
-        <Spotlight className="about-location">
-          <span className="bento-eyebrow">Flexible with Timezones</span>
-          <h3>
-            Based in Jaipur, India,
-            <br />
-            <span>available globally</span>
-          </h3>
-          <AboutGlobe />
+        <Spotlight className="about-location orbital-card-top">
+          <div className="orbital-content-top">
+            <span className="bento-eyebrow">Flexible with Timezones</span>
+            <h3>
+              Based in Jaipur, India,
+              <br />
+              <span>available globally</span>
+            </h3>
+            <AboutGlobe />
+          </div>
         </Spotlight>
         <Spotlight className="about-education">
           <div className="bento-label">
@@ -76,11 +78,14 @@ export function About() {
           </div>
         </Spotlight>
       </div>
-      <div className="about-orbital">
-        <Spotlight className="available-card" color="rgba(34,197,94,.1)">
+      <div className="about-orbital orbital-grid">
+        <Spotlight
+          className="available-card orbital-card-start"
+          color="rgba(34,197,94,.1)"
+        >
           <div className="available-bg-gradient" />
           <div className="available-border-ring" />
-          <div className="available-content">
+          <div className="available-content orbital-content-start">
             <p className="availability">
               <span />
               Available for Work
@@ -95,31 +100,37 @@ export function About() {
             </Link>
           </div>
         </Spotlight>
-        <AboutClock />
-        <Spotlight className="about-quote">
-          <span className="quote-mark">“</span>
-          <blockquote>
-            First, solve the problem.
-            <br />
-            Then, write the code.
-          </blockquote>
-          <p>John Johnson</p>
+        <div className="orbital-clock-cell">
+          <AboutClock />
+        </div>
+        <Spotlight className="about-quote orbital-card-end">
+          <div className="orbital-content-end">
+            <span className="quote-mark">“</span>
+            <blockquote>
+              First, solve the problem.
+              <br />
+              Then, write the code.
+            </blockquote>
+            <p>John Johnson</p>
+          </div>
         </Spotlight>
       </div>
-      <div className="about-stats">
-        {STATS.map((stat) => (
-          <Spotlight
-            key={stat.label}
-            className="impact-stat"
-            color={stat.color + "18"}
-            style={{ "--stat-accent": stat.color } as React.CSSProperties}
-          >
-            <stat.icon style={{ color: stat.color }} />
-            <CountUp to={stat.value} className="about-stat-number" />
-            <span>{stat.label}</span>
-          </Spotlight>
-        ))}
-      </div>
+      <Spotlight className="impact-stats-outer orbital-card-bottom">
+        <div className="about-stats orbital-content-bottom">
+          {STATS.map((stat) => (
+            <Spotlight
+              key={stat.label}
+              className="impact-stat"
+              color={stat.color + "18"}
+              style={{ "--stat-accent": stat.color } as React.CSSProperties}
+            >
+              <stat.icon style={{ color: stat.color }} />
+              <CountUp to={stat.value} className="about-stat-number" />
+              <span>{stat.label}</span>
+            </Spotlight>
+          ))}
+        </div>
+      </Spotlight>
     </ReferenceSection>
   );
 }

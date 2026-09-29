@@ -6,12 +6,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   FaTrophy,
   FaChartLine,
-  FaStar,
   FaMedal,
   FaAward,
   FaFire,
-  FaGraduationCap,
-  FaCode,
 } from "react-icons/fa";
 import { ReferenceSection, Spotlight } from "./reference-ui";
 
@@ -24,6 +21,7 @@ type Achievement = {
   href?: string;
 };
 
+// Five highlights, selected from Puneet's existing portfolio and public contest history.
 const ACHIEVEMENTS: Achievement[] = [
   {
     icon: "🏆",
@@ -34,81 +32,39 @@ const ACHIEVEMENTS: Achievement[] = [
     featured: true,
   },
   {
-    icon: "📊",
-    title: "Codeforces Pupil",
-    subtitle: "Max Rating 1243",
-    description:
-      "Reached Pupil rank with a peak rating of 1243 and 50+ problems solved.",
-  },
-  {
-    icon: "⭐",
-    title: "CodeChef 3★ Coder",
-    subtitle: "Max Rating 1593",
-    description:
-      "Reached 3★ with a peak rating of 1593 and 100+ problems solved.",
-  },
-  {
     icon: "🥇",
     title: "Global Rank #219",
-    subtitle: "CodeChef Div. 3",
-    description: "Finished 219th worldwide in a CodeChef Division 3 contest.",
+    subtitle: "CodeChef Starters 238 · Division 3",
+    description:
+      "Placed 219th globally in Starters 238 Division 3. Reached a three-star peak with a highest rating of 1613.",
+    href: "https://www.codechef.com/users/puneet_26",
   },
   {
-    icon: "🎯",
-    title: "Global Rank #1020",
-    subtitle: "Codeforces Div. 3",
-    description: "Placed 1020th globally in a Codeforces Division 3 round.",
+    icon: "📊",
+    title: "Codeforces Pupil · Global Rank #792",
+    subtitle: "Peak Rating 1375 · Round 1122",
+    description:
+      "Achieved global rank 792 in Codeforces Round 1122 Division 3, reaching a peak rating of 1375 with 365 distinct problems solved.",
+    href: "https://codeforces.com/profile/puneet26",
   },
   {
     icon: "🥈",
     title: "1st Runner-up — Web Development",
     subtitle: "JECRC · Jul 2026",
     description:
-      "Finished first runner-up in a college web development competition.",
-  },
-  {
-    icon: "🥉",
-    title: "3rd Place — ScreenFlex",
-    subtitle: "JECRC · Feb 2026",
-    description:
-      "Built a website clone from scratch under competition constraints.",
+      "Finished first runner-up in a college web development competition, turning product ideas into a working web experience.",
   },
   {
     icon: "🔥",
     title: "160 Days DSA Challenge",
     subtitle: "GeeksforGeeks · Completed",
     description:
-      "Completed the GfG 160-day streak through consistent daily practice.",
+      "Completed the GfG 160-day DSA challenge through consistent daily practice and a structured approach to problem solving.",
     href: "https://media.geeksforgeeks.org/courses/certificates/a8bf64a61fe9c0b45b55a919133f3f54.pdf",
   },
-  {
-    icon: "🎓",
-    title: "JEE B.Planning — AIR 1131",
-    subtitle: "98.7 Percentile",
-    description: "Secured All-India Rank 1131 with a 98.7 percentile.",
-  },
-  {
-    icon: "💡",
-    title: "Multi-platform DSA Practice",
-    subtitle: "Codeforces · CodeChef · LeetCode · GfG",
-    description:
-      "Built consistency across contests, daily challenges, and structured DSA practice.",
-  },
 ];
-
 const COLORS = ["#f59e0b", "#3b82f6", "#10b981", "#8b5cf6", "#ec4899"];
-const ICONS = [
-  FaTrophy,
-  FaChartLine,
-  FaStar,
-  FaMedal,
-  FaAward,
-  FaMedal,
-  FaTrophy,
-  FaFire,
-  FaGraduationCap,
-  FaCode,
-];
+const ICONS = [FaTrophy, FaMedal, FaChartLine, FaAward, FaFire];
 export function Achievements() {
   const root = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -180,7 +136,9 @@ export function Achievements() {
                       rel="noopener noreferrer"
                       className="certificate-link"
                     >
-                      View certificate ↗
+                      {a.href.includes("certificates")
+                        ? "View certificate ↗"
+                        : "View profile ↗"}
                     </a>
                   )}
                 </div>

@@ -100,6 +100,10 @@ export function Nav() {
             role="dialog"
             aria-modal="true"
             aria-label="Navigation"
+            data-lenis-prevent
+            onClick={(event) => {
+              if ((event.target as HTMLElement).closest("a")) setOpen(false);
+            }}
             onKeyDown={(event) => {
               if (event.key === "Escape") setOpen(false);
               if (event.key === "Tab") {

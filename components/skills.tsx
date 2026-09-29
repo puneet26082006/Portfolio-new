@@ -79,36 +79,30 @@ export function Skills() {
           {SKILLS.map((s) => {
             const Icon = s.icon;
             return (
-              <motion.div
-                key={s.name}
-                variants={staggerItem}
-                style={{ ["--skill-color"]: s.color } as CSSProperties}
-                className="group relative flex cursor-default flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border border-border bg-card px-3 py-6 transition-all duration-300 hover:-translate-y-1 hover:border-[var(--skill-color)]"
-              >
-                {/* brand-tint fill on hover */}
-                <span
-                  aria-hidden
-                  className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-[0.12]"
-                  style={{ background: s.color }}
-                />
-                {Icon ? (
-                  <Icon
-                    className="relative z-[1] h-7 w-7 transition-transform duration-300 group-hover:scale-110"
-                    style={{ color: s.color }}
-                    aria-hidden
-                  />
-                ) : (
-                  <span
-                    className="relative z-[1] text-lg font-bold leading-none transition-transform duration-300 group-hover:scale-110"
-                    style={{ color: s.color }}
-                    aria-hidden
-                  >
-                    {s.mono}
+              <motion.div key={s.name} variants={staggerItem}>
+                <div
+                  style={{ ["--skill-color"]: s.color } as CSSProperties}
+                  className="skill-item group relative flex h-full cursor-default flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border border-border bg-card px-3 py-6"
+                >
+                  {Icon ? (
+                    <Icon
+                      className="skill-icon relative z-[1] h-7 w-7"
+                      style={{ color: s.color }}
+                      aria-hidden
+                    />
+                  ) : (
+                    <span
+                      className="skill-icon relative z-[1] text-lg font-bold leading-none"
+                      style={{ color: s.color }}
+                      aria-hidden
+                    >
+                      {s.mono}
+                    </span>
+                  )}
+                  <span className="relative z-[1] text-center text-xs font-semibold tracking-wide text-muted transition-colors duration-300 group-hover:text-foreground">
+                    {s.name}
                   </span>
-                )}
-                <span className="relative z-[1] text-center text-xs font-semibold tracking-wide text-muted transition-colors duration-300 group-hover:text-foreground">
-                  {s.name}
-                </span>
+                </div>
               </motion.div>
             );
           })}

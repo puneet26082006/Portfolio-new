@@ -28,8 +28,8 @@ const STRIPS = [
     className: "bg-card border-y border-border text-muted",
     items: [
       "Codeforces Pupil",
-      "CodeChef 3★",
-      "LeetCode 1600+",
+      "CodeChef 3★ Peak",
+      "LeetCode 1750+",
       "160-Day DSA Streak",
       "Top 2% · AI India Impact Summit",
       "Creative Developer",
