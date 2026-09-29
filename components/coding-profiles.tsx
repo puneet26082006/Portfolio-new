@@ -219,20 +219,12 @@ export function CodingProfiles() {
     >
       <div className="mx-auto max-w-6xl px-6">
         {/* Heading — awrs.me style: left-aligned Inter bold + accent bar */}
-        <div className="mb-14 max-w-2xl">
+        <div className="reference-heading">
           <Reveal>
-            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-1.5 font-mono text-xs uppercase tracking-[0.2em] text-primary">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
-              Competitive Programming
-            </span>
-          </Reveal>
-          <Reveal delay={0.08}>
-            <h2 className="font-ui mt-5 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
               Coding Profiles
             </h2>
-          </Reveal>
-          <Reveal delay={0.12}>
-            <span className="mt-4 block h-1 w-16 rounded-full bg-gradient-to-r from-primary to-accent" />
+            <span className="mt-4 block h-1 w-16 rounded-full bg-primary" />
           </Reveal>
         </div>
 
@@ -246,7 +238,7 @@ export function CodingProfiles() {
             aria-hidden
           >
             <motion.div
-              className="h-full w-full origin-top bg-gradient-to-b from-primary-bright via-primary to-accent"
+              className="h-full w-full origin-top bg-gradient-to-b from-primary-bright via-primary to-primary-deep"
               style={{ scaleY: reduce ? 1 : fill }}
             />
             {/* soft head riding the growing tip */}
@@ -256,7 +248,7 @@ export function CodingProfiles() {
             />
             {/* terminal dot at the end of the line */}
             <motion.span
-              className="absolute bottom-0 left-1/2 h-3 w-3 -translate-x-1/2 translate-y-1/2 rounded-full bg-accent shadow-[0_0_14px_4px_rgba(245,158,11,0.45)]"
+              className="absolute bottom-0 left-1/2 h-3 w-3 -translate-x-1/2 translate-y-1/2 rounded-full bg-primary shadow-[0_0_14px_4px_rgba(212,84,126,0.45)]"
               style={{ opacity: reduce ? 1 : dotOpacity }}
             />
           </div>

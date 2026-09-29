@@ -71,7 +71,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${inter.variable} antialiased`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${inter.variable} dark antialiased`}
+      suppressHydrationWarning
+    >
       <body className="min-h-screen bg-background text-foreground">
         <LenisProvider>
           <ScrollBlur />

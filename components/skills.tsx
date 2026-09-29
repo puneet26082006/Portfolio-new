@@ -43,7 +43,12 @@ const SKILLS: Skill[] = [
   { name: "Razorpay", color: "#3395ff", icon: SiRazorpay },
 ];
 
-const SOFT = ["Analytical Thinking", "Problem Solving", "Team Collaboration", "Debugging"];
+const SOFT = [
+  "Analytical Thinking",
+  "Problem Solving",
+  "Team Collaboration",
+  "Debugging",
+];
 
 export function Skills() {
   return (
@@ -54,20 +59,12 @@ export function Skills() {
       <div className="mx-auto max-w-6xl px-6">
         {/* Heading — matches the Coding Profiles section (left-aligned Inter
             + eyebrow pill + gradient accent bar) so the two flow as one. */}
-        <div className="mb-14 max-w-2xl">
+        <div className="reference-heading">
           <Reveal>
-            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-1.5 font-mono text-xs uppercase tracking-[0.2em] text-primary">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
-              Tech Stack
-            </span>
-          </Reveal>
-          <Reveal delay={0.08}>
-            <h2 className="font-ui mt-5 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-              Tools I build with
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+              Skills
             </h2>
-          </Reveal>
-          <Reveal delay={0.12}>
-            <span className="mt-4 block h-1 w-16 rounded-full bg-gradient-to-r from-primary to-accent" />
+            <span className="mt-4 block h-1 w-16 rounded-full bg-primary" />
           </Reveal>
         </div>
 
