@@ -8,6 +8,8 @@ import "./navigation.css";
 import "./legal-pages.css";
 import "./theme.css";
 import "./blog.css";
+import "./context-menu.css";
+import { ContextMenu } from "@/components/context-menu";
 import { Nav } from "../components/nav";
 import { ScrollBlur } from "../components/scroll-blur";
 import { LenisProvider } from "../components/lenis-provider";
@@ -29,8 +31,6 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
-// Inter — the sans awrs.me uses for its section headings (kept scoped to the
-// Coding Profiles title via the .font-ui utility; body text stays on Geist).
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -94,6 +94,7 @@ export default function RootLayout({
         <LenisProvider>
           <ScrollBlur />
           <Nav />
+          <ContextMenu />
           {children}
           <Footer />
         </LenisProvider>

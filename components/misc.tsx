@@ -139,7 +139,7 @@ export function Misc() {
             }
           >
             <Image
-              src={"/misc/" + item.name + ".png"}
+              src={"/misc/" + item.name + ".webp"}
               width={item.width}
               height={item.height}
               alt={item.label}

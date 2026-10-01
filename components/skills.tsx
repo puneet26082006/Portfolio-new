@@ -21,12 +21,6 @@ import { Reveal, staggerContainer, staggerItem } from "./ui";
 
 type Skill = { name: string; color: string; icon?: IconType; mono?: string };
 
-/* Flat brand-icon grid with a brand-colour hover wash:
-   grid-cols-3 → lg:grid-cols-6, each a bordered `skill-item` card whose
-   own `--skill-color` drives a brand-tint fill on hover (icon/name ride
-   above via z-[1], card is overflow-hidden). Colours are each tool's real
-   brand hue; pure-black brands (Next/Express) go light so they read on the
-   dark card. */
 const SKILLS: Skill[] = [
   { name: "C++", color: "#00599C", icon: SiCplusplus },
   { name: "JavaScript", color: "#f7df1e", icon: SiJavascript },
@@ -57,8 +51,6 @@ export function Skills() {
       className="relative scroll-mt-24 pb-24 pt-12 md:pb-32 md:pt-16"
     >
       <div className="mx-auto max-w-6xl px-6">
-        {/* Heading — matches the Coding Profiles section (left-aligned Inter
-            + eyebrow pill + gradient accent bar) so the two flow as one. */}
         <div className="reference-heading">
           <Reveal>
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
@@ -68,7 +60,6 @@ export function Skills() {
           </Reveal>
         </div>
 
-        {/* Responsive skill grid */}
         <motion.div
           variants={staggerContainer}
           initial="hidden"
@@ -108,7 +99,6 @@ export function Skills() {
           })}
         </motion.div>
 
-        {/* Beyond code — kept from your stack, styled as a quiet secondary row */}
         <motion.div
           variants={staggerContainer}
           initial="hidden"

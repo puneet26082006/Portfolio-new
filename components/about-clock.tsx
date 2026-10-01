@@ -1,5 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
+const TIME_FORMAT = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Asia/Kolkata",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hourCycle: "h23",
+});
+
 export function AboutClock() {
   const [date, setDate] = useState<Date | null>(null);
   useEffect(() => {
@@ -12,16 +20,7 @@ export function AboutClock() {
     };
   }, []);
   const parts = date
-    ? new Intl.DateTimeFormat("en-GB", {
-        timeZone: "Asia/Kolkata",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hourCycle: "h23",
-      })
-        .format(date)
-        .split(":")
-        .map(Number)
+    ? TIME_FORMAT.format(date).split(":").map(Number)
     : [10, 10, 0];
   const [hours, minutes, seconds] = parts;
   return (

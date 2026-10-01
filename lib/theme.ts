@@ -10,9 +10,7 @@ export function setTheme(theme: Theme) {
   applyTheme(theme);
   try {
     localStorage.setItem("portfolio-theme", theme);
-  } catch {
-    /* Theme still works when storage is unavailable. */
-  }
+  } catch {}
 }
 function snapshot(): Theme {
   return document.documentElement.dataset.theme === "light" ? "light" : "dark";

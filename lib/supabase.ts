@@ -11,7 +11,7 @@ export function getSupabase(): SupabaseClient | null {
     const parsed = new URL(url);
     if (parsed.protocol !== "https:" || key.startsWith("sb_secret_"))
       return null;
-    // Support legacy anon keys, but never initialize a browser with a service-role key.
+
     if (!key.startsWith("sb_publishable_")) {
       const payload = JSON.parse(
         atob(key.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")),

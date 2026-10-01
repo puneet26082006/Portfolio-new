@@ -21,7 +21,6 @@ type Achievement = {
   href?: string;
 };
 
-// Five highlights, selected from Puneet's existing portfolio and public contest history.
 const ACHIEVEMENTS: Achievement[] = [
   {
     icon: "🏆",

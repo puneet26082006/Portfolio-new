@@ -52,19 +52,29 @@ export function AboutGlobe() {
       attributeFilter: ["data-theme"],
     });
     const draw = () => {
+      frame = 0;
       if (visible && !document.hidden && !reduced && !dragging) {
         phi += 0.003;
         globe.update({ phi });
+        frame = requestAnimationFrame(draw);
       }
-      frame = requestAnimationFrame(draw);
     };
-    draw();
+    const syncAnimation = () => {
+      cancelAnimationFrame(frame);
+      frame = 0;
+      if (visible && !document.hidden && !reduced && !dragging)
+        frame = requestAnimationFrame(draw);
+    };
+    syncAnimation();
+    document.addEventListener("visibilitychange", syncAnimation);
     const observer = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
+      syncAnimation();
     });
     observer.observe(el);
     const down = (e: PointerEvent) => {
       dragging = true;
+      syncAnimation();
       previousX = e.clientX;
       el.setPointerCapture(e.pointerId);
     };
@@ -76,6 +86,7 @@ export function AboutGlobe() {
     };
     const up = () => {
       dragging = false;
+      syncAnimation();
     };
     el.addEventListener("pointerdown", down);
     el.addEventListener("pointermove", move);
@@ -83,6 +94,7 @@ export function AboutGlobe() {
     el.addEventListener("pointercancel", up);
     return () => {
       cancelAnimationFrame(frame);
+      document.removeEventListener("visibilitychange", syncAnimation);
       observer.disconnect();
       themeObserver.disconnect();
       globe.destroy();

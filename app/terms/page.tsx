@@ -39,9 +39,9 @@ export default function TermsPage() {
         <p>
           My original writing, project descriptions, and other original work
           belong to me unless stated otherwise. Third-party libraries, assets,
-          and contributions remain subject to their owners&apos; rights and licenses.
-          You may link to the portfolio, but must not present my identity or
-          work as your own.
+          and contributions remain subject to their owners&apos; rights and
+          licenses. You may link to the portfolio, but must not present my
+          identity or work as your own.
         </p>
         <p>
           Source code in linked repositories is governed by the license included

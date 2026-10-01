@@ -136,17 +136,15 @@ export function ProjectDetail({ project }: { project: Project }) {
             scrub: 1,
           },
         });
-        root.current
-          ?.querySelectorAll("[data-detail-reveal]")
-          .forEach((el) =>
-            gsap.from(el, {
-              y: 30,
-              opacity: 0,
-              duration: 0.7,
-              ease: "power3.out",
-              scrollTrigger: { trigger: el, start: "top 90%", once: true },
-            }),
-          );
+        root.current?.querySelectorAll("[data-detail-reveal]").forEach((el) =>
+          gsap.from(el, {
+            y: 30,
+            opacity: 0,
+            duration: 0.7,
+            ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 90%", once: true },
+          }),
+        );
         gsap.to(".detail-scroll-progress", {
           scaleX: 1,
           ease: "none",

@@ -74,8 +74,7 @@ export function ProjectCard({
         hide();
         return;
       }
-      // Ease in viewport space, then compensate for the moving card every frame.
-      // Animate visibility separately so it cannot cancel pointer tracking.
+
       const blend = 1 - Math.exp(-Math.min(deltaMs, 64) / 55);
       displayed.x += (point.x - displayed.x) * blend;
       displayed.y += (point.y - displayed.y) * blend;
@@ -188,7 +187,7 @@ export function ProjectCard({
         </div>
         <div
           className="project-visual"
-          aria-label={`Generated mobile interface previews for ${project.title}`}
+          aria-label={`Illustrative mobile interface previews for ${project.title}`}
         >
           <div className="project-phone-group">
             {(["left", "center", "right"] as const).map((position, screen) => (
@@ -199,7 +198,7 @@ export function ProjectCard({
                 <div className="project-phone-screen">
                   <Image
                     src={project.image}
-                    alt={`${project.title} — generated ${position === "center" ? "main" : position} mobile preview`}
+                    alt={`${project.title} — illustrative ${position === "center" ? "main" : position} mobile preview`}
                     width={1536}
                     height={1024}
                     sizes="(min-width: 768px) 576px, 384px"

@@ -2,7 +2,8 @@
 import { Fragment, useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { BackgroundBeams } from "./background-beams";
-import { NAME } from "@/lib/intro";
+import { SITE } from "@/lib/site";
+const NAME = SITE.name;
 const STRIPS = [
   {
     angle: "4deg",

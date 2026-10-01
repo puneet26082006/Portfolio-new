@@ -67,7 +67,7 @@ export function WallExperience() {
       setUser(session?.user ?? null);
       setName(session?.user ? displayName(session.user) : "");
       setAuthReady(true);
-      // Drop cached private notes immediately when the account changes or expires.
+
       setNotes((current) =>
         current.filter(
           (note) =>
@@ -100,7 +100,7 @@ export function WallExperience() {
         );
         setOpen(true);
       }, 0);
-      // Remove provider error details rather than rendering untrusted URL messages.
+
       url.search = "";
       url.hash = "";
       history.replaceState(null, "", url.pathname);

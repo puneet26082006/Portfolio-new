@@ -46,3 +46,10 @@ next-env.d.ts
 
 # Local package download cache
 .npm-cache/
+
+# Local tooling and intermediate files
+/.openai/
+/AGENTS.md
+/CLAUDE.md
+/tmp/
+/output/

@@ -14,7 +14,12 @@ import { FaGithub, FaGoogle } from "react-icons/fa";
 import { FiX, FiEdit2, FiCheck, FiSend, FiTrash2 } from "react-icons/fi";
 import { PIN_COLORS } from "@/lib/wall";
 import type { DrawingDocument } from "@/lib/drawing";
-import { WallDrawingBoard } from "./wall-drawing-board";
+import dynamic from "next/dynamic";
+const WallDrawingBoard = dynamic(
+  () =>
+    import("./wall-drawing-board").then((module) => module.WallDrawingBoard),
+  { ssr: false },
+);
 
 type Props = {
   name: string | null;

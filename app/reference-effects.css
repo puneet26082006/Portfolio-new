@@ -1,4 +1,3 @@
-/* Reference visual effects adapted from the supplied awrs.me extraction. */
 @property --greeting-glow-angle {
   syntax: "<angle>";
   inherits: false;

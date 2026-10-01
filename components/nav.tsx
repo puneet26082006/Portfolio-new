@@ -22,6 +22,7 @@ import {
 } from "react-icons/fi";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { FloatingNav } from "./floating-nav";
+import { SITE } from "@/lib/site";
 import { PROJECTS } from "@/lib/content";
 import { useTheme, setTheme } from "@/lib/theme";
 
@@ -33,6 +34,7 @@ const PAGES = [
   { href: "/contact", label: "Contact", icon: FiMessageSquare },
 ];
 const SOCIALS = [
+  { label: "Resume PDF", href: SITE.resume, icon: FiFileText },
   {
     label: "GitHub",
     href: "https://github.com/puneet26082006",

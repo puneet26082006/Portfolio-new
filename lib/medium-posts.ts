@@ -10,7 +10,7 @@ export type MediumPost = {
   readMinutes: number;
 };
 export const MEDIUM_PROFILE = "https://medium.com/@puneetsaxena168";
-// Verified against the author RSS feed on October 1, 2026. Reading times estimated at 200 words/minute.
+
 export const MEDIUM_POSTS: MediumPost[] = [
   {
     title: "Exploring the Future: My Journey with the Vertex AI Gemini API",

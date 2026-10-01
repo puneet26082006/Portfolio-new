@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SITE } from "@/lib/site";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { FiMail } from "react-icons/fi";
 const LINKS = [
@@ -27,6 +28,9 @@ export function Footer() {
           </div>
           <div>
             <h3>Links</h3>
+            <a href={SITE.resume} download>
+              Download Resume
+            </a>
             {LINKS.map(([label, href]) => (
               <Link key={href} href={href}>
                 {label}

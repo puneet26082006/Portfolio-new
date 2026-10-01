@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import { SITE } from "@/lib/site";
 import {
   FiBookOpen,
   FiCode,
@@ -95,9 +95,9 @@ export function About() {
               <span className="gradient-text">LET&apos;S BUILD IT</span>
               <em>together.</em>
             </h3>
-            <Link href="/contact" className="reference-button">
-              Let&apos;s talk <FiArrowUpRight />
-            </Link>
+            <a href={SITE.resume} download className="reference-button">
+              Resume <FiArrowUpRight />
+            </a>
           </div>
         </Spotlight>
         <div className="orbital-clock-cell">

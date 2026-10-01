@@ -1,48 +1,80 @@
-# Puneet Saxena — Portfolio
+# Puneet Saxena - Portfolio
 
-An editorial, motion-led portfolio for Puneet Saxena: competitive programmer, full-stack developer, and AI & Data Science undergraduate at JECRC.
+A responsive portfolio built with Next.js 16, React 19, TypeScript, and Tailwind CSS. The site exports static files; visitor authentication and messages use Supabase and Formspree.
 
-## Included pages
+## Run locally
 
-- Animated home experience with profile, coding milestones, skills, projects, achievements, education, and contact CTA
-- Searchable full-screen navigation with dark/light themes
-- Project gallery and static case-study routes
-- Journal with five verified Medium posts, topic filters, search, and links to the originals; existing local article routes remain available
-- Supabase visitor wall with Google/GitHub sign-in, instant public notes, drawing studio, ownership controls, and posting limits
-- Formspree contact form and an optional embedded Cal.com/Calendly booking calendar
-- Privacy, terms, and custom 404 pages
+Use Node.js 22.6 or later (Node 22 LTS recommended).
 
-## Stack
+```sh
+npm ci
+```
 
-- Next.js 16 App Router
-- React 19 and TypeScript
-- Tailwind CSS 4
-- Framer Motion
-- Lenis smooth scrolling
+Copy `.env.example` to `.env.local`, fill the public settings, then run:
 
-## Development
-
-```bash
-npm install
+```sh
 npm run dev
 ```
 
-## Production build
+The development site opens at `http://localhost:3000`. Keep `.env.local` private.
 
-```bash
+## How the code works
+
+| Location                         | Responsibility                                                                                                                                                |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/`                           | Pages, metadata, global layout, and styles. `layout.tsx` adds navigation, theme initialization, smooth scrolling, the context menu, and footer.               |
+| `components/`                    | Page sections and reusable interfaces. GSAP handles the intro and scroll effects; Framer Motion handles component transitions.                                |
+| `lib/content.ts`                 | Project case studies and existing local journal articles. Static detail routes come from these records.                                                       |
+| `lib/projects.ts`                | Featured project previews and their display order. `project-catalog.ts` combines previews with case-study content for the gallery.                            |
+| `lib/medium-posts.ts`            | Five published Medium articles with original links, images, dates, and estimated reading times. The journal filters this data locally; it is not a live feed. |
+| `lib/site.ts`                    | Name, contact links, and the downloadable resume path.                                                                                                        |
+| `lib/theme.ts`                   | Dark/light preference, browser storage, and synchronization between open tabs. Theme colors live in CSS variables.                                            |
+| `lib/contact-service.ts`         | Validates contact fields and sends an HTTPS request to Formspree. Success appears only after the provider accepts it.                                         |
+| `lib/supabase.ts`, `lib/wall.ts` | Browser-safe Supabase setup, wall data mapping, pin colors, and error messages.                                                                               |
+| `lib/drawing.ts`                 | Canvas coordinates, drawing rendering, undo, and redo. The drawing editor loads only when opened.                                                             |
+| `supabase/migrations/`           | Database tables, row-level security, posting validation, ownership, and rate limits. Apply files in filename order.                                           |
+| `public/`                        | Images, site icon, and `Puneet-Saxena-Resume.pdf`. Files here are publicly accessible.                                                                        |
+| `tests/`                         | Contact validation, drawing behavior, PostgreSQL security checks, and static-preview checks.                                                                  |
+| `scripts/`                       | Local production preview and a read-only wall backend version check.                                                                                          |
+
+### Pages and interactions
+
+- `/`: introduction, about/education, coding profiles, skills, featured projects, achievements, GitHub contributions, miscellaneous artwork, and contact link.
+- `/projects/` and `/projects/[slug]/`: gallery and project details. SmartFlow AI, Pixora AI, and Fair Relief Routing appear first.
+- `/blog/`: searchable Medium journal. Existing `/blog/[slug]/` pages remain available.
+- `/contact/`: message form and optional embedded booking calendar.
+- `/wall/`: visitors sign in with Google or GitHub, write a note or draw, choose a color, and publish immediately. Only the owner's notes can be deleted by that owner. Database rules validate every submission and enforce posting limits.
+- `/privacy/` and `/terms/`: service and data-use information.
+
+Right-click opens resume, social, email, and page actions. Arrow keys navigate the menu; Escape closes it. Shift+F10 opens it from the keyboard. Native menus remain available in text fields and drawings, with selected text, or by holding Shift while right-clicking. Resume links also appear in About, navigation, and the footer for touch users.
+
+## Configuration
+
+| Variable                               | Value                                                                 |
+| -------------------------------------- | --------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Supabase project URL                                                  |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Publishable key (or legacy anon key), never a secret/service-role key |
+| `NEXT_PUBLIC_FORMSPREE_FORM_ID`        | Final segment of the Formspree endpoint                               |
+| `NEXT_PUBLIC_BOOKING_URL`              | Full HTTPS Cal.com or Calendly event URL                              |
+
+OAuth client secrets belong in Supabase Authentication settings. Follow [backend setup](docs/BACKEND_SETUP.md) for provider callbacks, allowed redirects, database setup, and contact delivery. See [drawing studio](docs/WALL_STUDIO.md) for editor behavior.
+
+## Check and deploy
+
+```sh
+npm run lint
+npm run typecheck
+npm test
 npm run build
+npm run preview
 ```
 
-Project content lives in `lib/content.ts`; shared visual components live in `components/`.
+The build writes `out/`. Preview serves it at `http://localhost:3001` (override with `PORT`). `npm start` is an alias for this local preview; no Next.js server is needed in production.
 
-## Configuration and deployment
+Vercel and Netlify configurations are included. Import this GitHub repository, set the four public environment variables in the host dashboard **before building**, and deploy. The build command is `npm run build`; publish directory is `out`. Other static hosts can publish the same directory, serve directory `index.html` files, and use `404.html` for missing pages. Do not rewrite every URL to the home page.
 
-Copy `.env.example` to `.env.local` and fill the browser-safe settings. Follow [backend setup](docs/BACKEND_SETUP.md) for Supabase providers, redirects, and migrations. OAuth secrets belong in the Supabase dashboard, never in a `NEXT_PUBLIC_` variable.
+For a custom domain, add `https://your-domain/wall/` to Supabase's allowed redirect URLs and configure the production Site URL. Set the domain in Formspree if using domain restrictions. Rebuild whenever a public environment setting changes. `.env.local`, dependencies, caches, and build output are excluded from Git.
 
-The production build exports `out/`. Configure the same public environment variables in your hosting provider **before building**: the Supabase URL/publishable key, Formspree form ID, and full booking event URL. Local `.env.local` values are deliberately not pushed to GitHub. Rebuild after changing public settings.
+## Updating content
 
-Medium article metadata lives in `lib/medium-posts.ts`; it is a verified snapshot, not a live feed. Update it when publishing new articles. Titles, dates, and original badge images come from [Puneet's Medium profile](https://medium.com/@puneetsaxena168). Reading times are estimates.
-
-The portfolio quote is attributed to Edsger W. Dijkstra, [On the nature of Computing Science (EWD 896)](https://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD896.html).
-
-Run `npm test`, `npm run lint`, and `npm run build` before publishing. See [verification notes](docs/verification/README.md) for completed checks and their limits.
+Edit the relevant data file and rebuild. Update Medium metadata when publishing new articles. Replace the PDF in `public/` when the resume changes. The current resume uses embedded Times New Roman, selectable text, and a single-column layout; tailor its wording to the job rather than relying on a universal ATS score. Project phone images are illustrative interface concepts.

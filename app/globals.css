@@ -1,17 +1,7 @@
 @import "tailwindcss";
 @import "./reference-effects.css";
 
-/*
-  Puneet Saxena — Portfolio design system
-  Rose/amber dark theme inspired by awrs.me.
-  Tailwind v4: theme tokens live in @theme so utilities like
-  bg-background / text-primary / border-border are generated.
-*/
-
 @theme {
-  /* Surfaces — background matches awrs.me's flat, near-black page surface.
-     It is deliberately the same tone the Coding Profiles band used to paint
-     on top, so every section now shares ONE continuous surface. */
   --color-background: #000;
   --color-background-soft: #080808;
   --color-card: #070707;
@@ -20,32 +10,26 @@
   --color-border-soft: #1a1a1a;
   --color-navbar: #0a0a0aeb;
 
-  /* Text */
   --color-foreground: #f0f0f0;
   --color-muted: #a1a1aa;
   --color-muted-foreground: #a1a1aa;
   --color-faint: #6b6b74;
 
-  /* Brand — rose */
   --color-primary: #d4547e;
   --color-primary-soft: #e07a9c;
   --color-primary-bright: #f5b8cc;
   --color-primary-deep: #a83d62;
 
-  /* Brand — amber accent */
   --color-accent: #f59e0b;
   --color-accent-soft: #fbbf24;
 
-  /* Fonts (wired to next/font vars in layout.tsx) */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --font-display: var(--font-playfair), Georgia, "Times New Roman", serif;
 
-  /* Animation timing */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Rotating angle used by the conic-gradient glow borders */
 @property --angle {
   syntax: "<angle>";
   inherits: false;
@@ -57,8 +41,6 @@
 }
 
 html {
-  /* Smoothness is driven by Lenis (see components/lenis-provider.tsx); native
-     smooth scroll would fight it, so only the anchor offset is kept here. */
   scroll-padding-top: 6rem;
   color-scheme: dark;
 }
@@ -93,9 +75,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Ambient page background: awrs.me keeps this almost flat — one whisper-soft
-   rose glow at the very top instead of the multi-orb aurora that read as
-   "AI-generated". The hero paints its own radial glow on top of this. */
 body::before {
   content: "";
   position: fixed;
@@ -118,8 +97,7 @@ body::after {
     linear-gradient(to right, rgba(255, 255, 255, 0.022) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
   background-size: 56px 56px;
-  /* Even, page-wide grid (was clipped to the top) so no section reads as a
-     different surface — the whole page is one animated sheet. */
+
   mask-image: linear-gradient(to bottom, #000 0%, #000 65%, transparent 100%);
   -webkit-mask-image: linear-gradient(
     to bottom,
@@ -135,7 +113,6 @@ body::after {
   color: #fff;
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -148,10 +125,6 @@ body::after {
   border-radius: 99px;
   border: 2px solid var(--color-background);
 }
-
-/* ============================================================
-   Utilities
-   ============================================================ */
 
 .text-gradient {
   background: linear-gradient(
@@ -170,7 +143,6 @@ body::after {
   font-family: var(--font-display);
 }
 
-/* Inter — awrs.me's section-heading sans (used on the Coding Profiles title). */
 .font-ui {
   font-family:
     var(--font-inter),
@@ -181,7 +153,6 @@ body::after {
     sans-serif;
 }
 
-/* Abstract artwork for the additional case studies. */
 .case-study-visual {
   background:
     radial-gradient(
@@ -276,7 +247,6 @@ button {
   }
 }
 
-/* Glass panels */
 .glass {
   background: color-mix(in oklab, var(--color-card) 82%, transparent);
   backdrop-filter: blur(14px);
@@ -284,7 +254,6 @@ button {
   border: 1px solid var(--color-border);
 }
 
-/* ----- Rotating conic-gradient glow border (signature card effect) ----- */
 .glow-border {
   position: relative;
   isolation: isolate;
@@ -316,7 +285,7 @@ button {
 .glow-border:hover::before {
   opacity: 1;
 }
-/* Always-on variant for hero / feature cards */
+
 .glow-border-always::before {
   opacity: 0.9;
 }
@@ -327,7 +296,6 @@ button {
   }
 }
 
-/* ----- Marquee ----- */
 .marquee {
   display: flex;
   width: max-content;
@@ -348,9 +316,6 @@ button {
   }
 }
 
-/* ----- Hero diagonal strips (awrs.me `hero-marquee-track`) -----
-   Each track holds its items twice, so translateX(-50%) is a seamless loop.
-   Duration is driven per-strip by the inline --marquee-duration. */
 .hero-marquee-track,
 .hero-marquee-track-reverse {
   display: flex;
@@ -361,7 +326,6 @@ button {
   animation-direction: reverse;
 }
 
-/* ----- Aurora drift (contact CTA background) ----- */
 .aurora {
   position: absolute;
   border-radius: 50%;
@@ -381,7 +345,6 @@ button {
   }
 }
 
-/* ----- Float / glow / shimmer / spin ----- */
 @keyframes float-slow {
   0%,
   100% {
@@ -456,7 +419,6 @@ button {
   animation: ping-ring 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
-/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -470,7 +432,6 @@ button {
   }
 }
 
-/* Reference: awrs.me's fixed 70/120/180px top-edge blur layers. */
 .scroll-blur {
   position: fixed;
   inset: 0 0 auto;
@@ -484,8 +445,6 @@ button {
   -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
 }
 
-/* FeaturedProjects / ProjectCard / PhoneFrame dimensions and transforms
-   extracted from awrs.me's public components and stylesheet. */
 .featured-projects {
   position: relative;
   scroll-margin-top: 0;
@@ -1108,7 +1067,6 @@ button {
   }
 }
 
-/* Shared reference theme and home-page composition. */
 :root {
   --color-primary-light: #e07a9c;
   --color-primary-dark: #a83d62;
@@ -2220,7 +2178,6 @@ html {
   inset: -24px;
 }
 
-/* Reference orbital masks and skill hover layers. */
 .orbital-grid {
   flex-direction: column;
   gap: 0;
@@ -2689,7 +2646,7 @@ html {
   .contact-cta-particle {
     animation: none !important;
   }
-} /* Fit the year to its card instead of creating a horizontal scroller. */
+}
 .contribution-calendar {
   width: 100%;
   min-width: 0;
@@ -2704,7 +2661,6 @@ html {
   min-width: 0;
 }
 
-/* Keep the clock center aligned with all four reference cutouts. */
 .about-orbital.orbital-grid {
   gap: 0;
   margin-top: 12px;
@@ -2811,7 +2767,6 @@ html {
   }
 }
 
-/* Reference contact card: two auroras, cursor halo, grain, particles and CTA sweep. */
 .contact-reference {
   position: relative;
   overflow: hidden;

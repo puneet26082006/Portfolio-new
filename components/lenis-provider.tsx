@@ -5,23 +5,11 @@ import Lenis from "lenis";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
-/* ------------------------------------------------------------------ *
- * LenisProvider — smooth scroll with { autoRaf:false, duration:1.2, expo-out
- * easing, touchMultiplier:1.5 } and drives lenis.raf() off a single shared
- * ticker (they use GSAP's; we use framer-motion's `frame` loop) so that
- * useScroll/useTransform read the SAME frame Lenis writes — no jitter, no
- * second rAF. Lenis writes the real native scroll position, so framer-motion's
- * useScroll needs no scroller proxy.
- *
- * No React state is touched on scroll (the instance lives in a ref), so this
- * never triggers a re-render and never violates react-hooks/set-state-in-effect.
- * ------------------------------------------------------------------ */
 export function LenisProvider({ children }: { children: React.ReactNode }) {
   const lenisRef = useRef<Lenis | null>(null);
   const pathname = usePathname();
 
   useEffect(() => {
-    // Honor prefers-reduced-motion: skip smooth scroll, leave native scroll intact.
     if (
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -37,9 +25,8 @@ export function LenisProvider({ children }: { children: React.ReactNode }) {
     });
     lenisRef.current = lenis;
 
-    // framer-motion's frame.update passes a DOMHighResTimeStamp (ms) — exactly
-    // what lenis.raf expects. keepAlive=true keeps it running every frame.
-    const update = ({ timestamp }: { timestamp: number }) => lenis.raf(timestamp);
+    const update = ({ timestamp }: { timestamp: number }) =>
+      lenis.raf(timestamp);
     frame.update(update, true);
 
     return () => {
@@ -49,7 +36,6 @@ export function LenisProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Preserve direct section links while resetting ordinary route navigation.
   useEffect(() => {
     const target = document.getElementById(window.location.hash.slice(1));
     lenisRef.current?.scrollTo(target ?? 0, { immediate: true });

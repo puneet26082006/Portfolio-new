@@ -34,9 +34,15 @@ export function PageIntro({
         {words.map((word, index) => (
           <motion.span
             key={`${word}-${index}`}
-            initial={reduce ? false : { opacity: 0, y: 42, filter: "blur(8px)" }}
+            initial={
+              reduce ? false : { opacity: 0, y: 42, filter: "blur(8px)" }
+            }
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 0.72, delay: 0.08 + index * 0.07, ease: [0.16, 1, 0.3, 1] }}
+            transition={{
+              duration: 0.72,
+              delay: 0.08 + index * 0.07,
+              ease: [0.16, 1, 0.3, 1],
+            }}
             className={`mr-[0.22em] inline-block last:mr-0 ${
               accent && word.toLowerCase().includes(accent.toLowerCase())
                 ? "font-display italic text-primary"

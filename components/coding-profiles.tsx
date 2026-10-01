@@ -30,9 +30,6 @@ type Profile = {
   href: string;
 };
 
-// Vivid, distinct per-platform colours (awrs.me-style) — each card owns one
-// bright hue that pops on the near-black background and pulls the eye. Blue /
-// pink / yellow / green: four distinct hues, high-contrast, no muddy gradients.
 const PROFILES: Profile[] = [
   {
     name: "Codeforces",
@@ -100,20 +97,11 @@ const PROFILES: Profile[] = [
   },
 ];
 
-// GSAP power3.out (used on awrs.me) as a cubic-bezier — fast in, decelerating settle.
 const EASE_POWER3: [number, number, number, number] = [0.215, 0.61, 0.355, 1];
 
-/* ------------------------------------------------------------------ *
- * ProfileEntry — one node of the experience-style timeline, ported 1:1
- * from awrs.me's Experience component: bare content (no card box),
- * first entry on the LEFT and alternating, text stacked exactly like
- * theirs (period → title → subtitle → description → meta " · "),
- * marker = ring + solid-colour circle with white logo riding the line.
- * Mobile swaps the centre line for a coloured start-border (as they do).
- * ------------------------------------------------------------------ */
 function ProfileEntry({ p, index }: { p: Profile; index: number }) {
   const reduce = useReducedMotion();
-  // awrs.me: `let o = a % 2 == 0` — first entry sits in column 1 (left).
+
   const isLeft = index % 2 === 0;
   const Icon = p.icon;
 
@@ -127,8 +115,6 @@ function ProfileEntry({ p, index }: { p: Profile; index: number }) {
       className="group/exp relative border-s-[3px] ps-5 md:border-s-0 md:grid md:grid-cols-2 md:gap-16 md:ps-0"
       style={{ borderInlineStartColor: p.accent }}
     >
-      {/* Desktop marker — ring + solid colour disc with white logo, centred on
-          the line at the top of the entry (awrs.me exact construction). */}
       <div className="absolute top-1 left-1/2 z-10 hidden -translate-x-1/2 items-center justify-center md:flex">
         <span
           aria-hidden
@@ -147,7 +133,6 @@ function ProfileEntry({ p, index }: { p: Profile; index: number }) {
       </div>
 
       <div className={isLeft ? undefined : "md:col-start-2"}>
-        {/* Entrance: down → up (y 40), power3-out, once — awrs.me exact params */}
         <motion.a
           href={p.href}
           target="_blank"
@@ -158,7 +143,6 @@ function ProfileEntry({ p, index }: { p: Profile; index: number }) {
           transition={{ duration: 0.8, ease: EASE_POWER3 }}
           className="block"
         >
-          {/* Mobile chip + period line */}
           <div className="flex items-center gap-3 md:block">
             <span
               className="grid h-8 w-8 shrink-0 place-items-center rounded-full md:hidden"
@@ -178,7 +162,6 @@ function ProfileEntry({ p, index }: { p: Profile; index: number }) {
             </span>
           </div>
 
-          {/* Title + handle (awrs: title → coloured subtitle) */}
           <h3 className="mt-2 text-xl font-bold leading-tight text-foreground">
             {p.name}
           </h3>
@@ -186,7 +169,6 @@ function ProfileEntry({ p, index }: { p: Profile; index: number }) {
             @{p.handle}
           </p>
 
-          {/* Meta — one middot-joined line (awrs tags treatment) */}
           <p className="mt-3 text-sm leading-relaxed text-muted">
             {p.description}
           </p>
@@ -210,8 +192,6 @@ export function CodingProfiles() {
   const timelineRef = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
 
-  // Scroll-scrubbed spine — awrs.me: grow from "top 70%" to "bottom 30%",
-  // scrubbed (~0.3 smoothing ⇒ light spring).
   const { scrollYProgress } = useScroll({
     target: timelineRef,
     offset: ["start 0.7", "end 0.3"],
@@ -230,7 +210,6 @@ export function CodingProfiles() {
       className="relative scroll-mt-24 pb-16 pt-24 md:pb-24 md:pt-32"
     >
       <div className="mx-auto max-w-6xl px-6">
-        {/* Heading — awrs.me style: left-aligned Inter bold + accent bar */}
         <div className="reference-heading">
           <Reveal>
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
@@ -240,11 +219,7 @@ export function CodingProfiles() {
           </Reveal>
         </div>
 
-        {/* Timeline — awrs.me narrows to max-w-4xl and centres it */}
         <div ref={timelineRef} className="relative mx-auto max-w-4xl">
-          {/* Running line — 2px, centred, desktop only (mobile uses the
-              coloured start-borders). Grows with scroll; brand-coloured so it
-              visibly "runs"; terminal dot at its end (awrs.me). */}
           <div
             className="pointer-events-none absolute inset-y-0 left-6 z-0 hidden w-[2px] -translate-x-1/2 md:left-1/2 md:block"
             aria-hidden
@@ -253,12 +228,12 @@ export function CodingProfiles() {
               className="h-full w-full origin-top bg-gradient-to-b from-primary-bright via-primary to-primary-deep"
               style={{ scaleY: reduce ? 1 : fill }}
             />
-            {/* soft head riding the growing tip */}
+
             <motion.span
               className="absolute left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-primary-bright shadow-[0_0_10px_3px_rgba(212,84,126,0.55)]"
               style={{ top: headTop, opacity: reduce ? 0 : 1 }}
             />
-            {/* terminal dot at the end of the line */}
+
             <motion.span
               className="absolute bottom-0 left-1/2 h-3 w-3 -translate-x-1/2 translate-y-1/2 rounded-full bg-primary shadow-[0_0_14px_4px_rgba(212,84,126,0.45)]"
               style={{ opacity: reduce ? 1 : dotOpacity }}
