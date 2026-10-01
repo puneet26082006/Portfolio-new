@@ -12,6 +12,22 @@ export function AboutGlobe() {
       dragging = false,
       previousX = 0;
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const palette = () => {
+      const light = document.documentElement.dataset.theme === "light";
+      return {
+        dark: light ? 0 : 1,
+        baseColor: (light ? [1, 1, 1] : [0.3, 0.3, 0.3]) as [
+          number,
+          number,
+          number,
+        ],
+        glowColor: (light ? [0.9, 0.87, 0.89] : [0.08, 0.08, 0.08]) as [
+          number,
+          number,
+          number,
+        ],
+      };
+    };
     let globe: ReturnType<typeof createGlobe>;
     try {
       globe = createGlobe(el, {
@@ -20,18 +36,21 @@ export function AboutGlobe() {
         devicePixelRatio: 2,
         phi,
         theta: 0.25,
-        dark: 1,
+        ...palette(),
         diffuse: 1.2,
         mapSamples: 16000,
         mapBrightness: 6,
-        baseColor: [0.3, 0.3, 0.3],
         markerColor: [0.83, 0.33, 0.49],
-        glowColor: [0.08, 0.08, 0.08],
         markers: [{ location: [26.9124, 75.7873], size: 0.065 }],
       });
     } catch {
       return;
     }
+    const themeObserver = new MutationObserver(() => globe.update(palette()));
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
     const draw = () => {
       if (visible && !document.hidden && !reduced && !dragging) {
         phi += 0.003;
@@ -65,6 +84,7 @@ export function AboutGlobe() {
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
+      themeObserver.disconnect();
       globe.destroy();
       el.removeEventListener("pointerdown", down);
       el.removeEventListener("pointermove", move);

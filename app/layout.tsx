@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import "./inner-pages.css";
+import "./wall-studio.css";
+import "./wall-page.css";
+import "./navigation.css";
+import "./legal-pages.css";
+import "./theme.css";
+import "./blog.css";
 import { Nav } from "../components/nav";
 import { ScrollBlur } from "../components/scroll-blur";
 import { LenisProvider } from "../components/lenis-provider";
@@ -76,6 +83,13 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${inter.variable} dark antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var t='dark';try{if(localStorage.getItem('portfolio-theme')==='light')t='light';}catch(e){}document.documentElement.dataset.theme=t;document.documentElement.classList.toggle('dark',t==='dark');})();`,
+          }}
+        />
+      </head>
       <body className="min-h-screen bg-background text-foreground">
         <LenisProvider>
           <ScrollBlur />

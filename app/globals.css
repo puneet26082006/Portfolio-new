@@ -502,7 +502,7 @@ button {
   margin-bottom: 40px;
 }
 .projects-heading h2 {
-  color: #f0f0f0;
+  color: var(--color-foreground);
   font-size: 30px;
   font-weight: 700;
   line-height: 36px;
@@ -544,9 +544,9 @@ button {
   overflow: hidden;
   font-family: var(--font-inter), system-ui, sans-serif;
   border-radius: 16px;
-  border: 1px solid #242424;
-  background: #070707;
-  color: #f0f0f0;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-foreground);
   transition:
     box-shadow 0.3s,
     border-color 0.3s;
@@ -609,11 +609,11 @@ button {
 .project-rule {
   flex: 1;
   min-width: 0;
-  border-top: 1px dashed #242424;
+  border-top: 1px dashed var(--color-border);
 }
 .project-category {
   flex-shrink: 0;
-  color: #71717a;
+  color: var(--color-faint);
   font-size: 10px;
   line-height: 15px;
   font-weight: 600;
@@ -622,7 +622,7 @@ button {
 }
 .project-label {
   flex-shrink: 0;
-  color: #71717a;
+  color: var(--color-faint);
   font: 10px/15px var(--font-mono);
 }
 .project-title-row {
@@ -702,7 +702,7 @@ button {
   margin: 0;
   font-size: 14px;
   line-height: 22.75px;
-  color: #a1a1aa;
+  color: var(--color-muted);
 }
 .project-visual {
   position: relative;
@@ -797,14 +797,14 @@ button {
   padding: 0 20px 16px;
 }
 .project-tags li {
-  border: 1px solid #242424;
-  background: #0c0c0c;
+  border: 1px solid var(--color-border);
+  background: var(--color-background-soft);
   border-radius: 999px;
   padding: 4px 10px;
   font-size: 11px;
   line-height: 16.5px;
   font-weight: 500;
-  color: #a1a1aa;
+  color: var(--color-muted);
 }
 .project-main-link:focus-visible,
 .project-code-link:focus-visible,
@@ -875,11 +875,11 @@ button {
   flex-direction: column;
   gap: 28px;
   padding: 48px 32px;
-  border: 1px solid #242424;
+  border: 1px solid var(--color-border);
   border-radius: 16px;
   text-align: center;
   overflow: hidden;
-  background: #070707;
+  background: var(--color-card);
   transition: border-color 0.3s;
 }
 .projects-more::before {
@@ -927,19 +927,19 @@ button {
   margin-top: 8px;
   font-size: 14px;
   line-height: 20px;
-  color: #71717a;
+  color: var(--color-faint);
 }
 .projects-more-button {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   padding: 12px 24px;
-  border: 1px solid #242424;
+  border: 1px solid var(--color-border);
   border-radius: 999px;
   font-size: 14px;
   line-height: 20px;
   font-weight: 600;
-  color: #a1a1aa;
+  color: var(--color-muted);
 }
 .projects-more:hover .projects-more-button {
   color: var(--color-primary);
@@ -1126,7 +1126,7 @@ body {
   padding-top: 80px;
 }
 html {
-  scrollbar-color: #d4547e #000;
+  scrollbar-color: var(--color-primary) var(--color-background);
   scrollbar-width: thin;
 }
 :focus-visible {

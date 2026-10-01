@@ -1,32 +1,21 @@
 import type { Metadata } from "next";
+import { GalleryHeading } from "@/components/gallery-heading";
 import { ProjectCard } from "@/components/project-card";
-import { PROJECTS } from "@/lib/projects";
-import { PROJECTS as CASE_STUDIES } from "@/lib/content";
-import { CaseStudyCard } from "@/components/case-study-card";
-
+import { PROJECT_CATALOG } from "@/lib/project-catalog";
 export const metadata: Metadata = {
-  title: "Projects",
-  description: "Explore Pixora AI, Honey Comb, and Smart Flow AI — AI products by Puneet Saxena.",
+  title: "Projects Gallery",
+  description:
+    "Explore Puneet Saxena's web applications, AI products, and optimization projects.",
 };
-
 export default function ProjectsPage() {
   return (
-    <main className="relative mx-auto max-w-6xl px-6 pb-28 pt-36 md:pt-44">
-      <header className="projects-gallery-heading">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">Selected work</p>
-        <h1 className="font-ui mt-5 text-4xl font-bold tracking-tight md:text-6xl">Projects</h1>
-        <span className="projects-heading-line" />
-      </header>
-      <div className="projects-gallery">
-        {PROJECTS.map((project, index) => <ProjectCard key={project.id} project={project} index={index} />)}
+    <main className="project-gallery-page">
+      <GalleryHeading />
+      <div className="projects-gallery reference-gallery">
+        {PROJECT_CATALOG.map((project, index) => (
+          <ProjectCard key={project.id} project={project} index={index} />
+        ))}
       </div>
-      <section className="mt-16" aria-labelledby="additional-projects">
-        <h2 id="additional-projects" className="font-ui mb-6 text-2xl font-bold">More projects</h2>
-        <div className="grid gap-6 lg:grid-cols-2">
-          {CASE_STUDIES.filter(project => project.slug === "fair-relief-routing" || project.slug === "virtual-herbal-garden").map((project, index) => <CaseStudyCard key={project.slug} project={project} index={index} />)}
-        </div>
-      </section>
-      <a href="https://github.com/puneet26082006" target="_blank" rel="noopener noreferrer" className="mt-10 inline-flex items-center gap-2 text-sm text-muted hover:text-foreground">More experiments on GitHub <span aria-hidden="true">↗</span></a>
     </main>
   );
 }

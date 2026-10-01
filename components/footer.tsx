@@ -21,9 +21,8 @@ export function Footer() {
               ps<span>~</span>
             </Link>
             <p className="footer-quote">
-              First, solve the problem.
-              <br />
-              Then, write the code.
+              Simplicity is a great virtue but it requires hard work to achieve
+              it and education to appreciate it.
             </p>
           </div>
           <div>

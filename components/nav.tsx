@@ -1,270 +1,307 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState, useRef } from "react";
+import { createPortal } from "react-dom";
+import {
+  FiSearch,
+  FiHome,
+  FiFolder,
+  FiBookOpen,
+  FiEdit2,
+  FiMessageSquare,
+  FiGlobe,
+  FiSun,
+  FiMoon,
+  FiShield,
+  FiFileText,
+  FiCheck,
+  FiCode,
+} from "react-icons/fi";
+import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { FloatingNav } from "./floating-nav";
 import { PROJECTS } from "@/lib/content";
+import { useTheme, setTheme } from "@/lib/theme";
 
 const PAGES = [
-  { href: "/", label: "Home", index: "01" },
-  { href: "/projects", label: "Projects", index: "02" },
-  { href: "/blog", label: "Journal", index: "03" },
-  { href: "/wall", label: "The Wall", index: "04" },
-  { href: "/contact", label: "Contact", index: "05" },
+  { href: "/", label: "Home", icon: FiHome },
+  { href: "/projects", label: "Projects", icon: FiFolder },
+  { href: "/blog", label: "Blog", icon: FiBookOpen },
+  { href: "/wall", label: "The Wall", icon: FiEdit2 },
+  { href: "/contact", label: "Contact", icon: FiMessageSquare },
 ];
-
 const SOCIALS = [
-  { label: "GitHub", href: "https://github.com/puneet26082006" },
+  {
+    label: "GitHub",
+    href: "https://github.com/puneet26082006",
+    icon: FaGithub,
+  },
   {
     label: "LinkedIn",
     href: "https://www.linkedin.com/in/puneet-saxena-b8594a325/",
+    icon: FaLinkedin,
   },
-  { label: "Codeforces", href: "https://codeforces.com/profile/puneet26" },
-  { label: "LeetCode", href: "https://leetcode.com/u/_puneet26/" },
+  {
+    label: "Codeforces",
+    href: "https://codeforces.com/profile/puneet26",
+    icon: FiCode,
+  },
+  {
+    label: "LeetCode",
+    href: "https://leetcode.com/u/_puneet26/",
+    icon: FiCode,
+  },
 ];
-
 export function Nav() {
-  const pathname = usePathname();
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const pathname = usePathname(),
+    router = useRouter(),
+    reduced = useReducedMotion();
+  const [open, setOpen] = useState(false),
+    [query, setQuery] = useState("");
+  const [languageOpen, setLanguageOpen] = useState(false);
+  const theme = useTheme();
   const dialogRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const saved = localStorage.getItem("portfolio-theme");
-      const next = saved === "light" ? "light" : "dark";
-      setTheme(next);
-      document.documentElement.dataset.theme = next;
-      document.documentElement.classList.toggle("dark", next === "dark");
-    }, 0);
-    return () => clearTimeout(timer);
-  }, []);
-
   useEffect(() => {
     const timer = setTimeout(() => {
       setOpen(false);
       setQuery("");
+      setLanguageOpen(false);
     }, 0);
     return () => clearTimeout(timer);
   }, [pathname]);
-
   useEffect(() => {
-    const previous = document.activeElement as HTMLElement | null;
-    const timer = setTimeout(() => {
-      if (open)
-        dialogRef.current?.querySelector<HTMLElement>("a,button")?.focus();
-    }, 50);
-    document.body.style.overflow = open ? "hidden" : "";
+    if (!open) return;
+    const previous = document.activeElement as HTMLElement | null,
+      overflow = document.body.style.overflow;
+    const timer = setTimeout(
+      () =>
+        dialogRef.current?.querySelector<HTMLInputElement>("input")?.focus(),
+      60,
+    );
+    document.body.style.overflow = "hidden";
     return () => {
       clearTimeout(timer);
-      document.body.style.overflow = "";
-      if (open) previous?.focus();
+      document.body.style.overflow = overflow;
+      previous?.focus();
     };
   }, [open]);
-
   const suggestions = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (!normalized) return PROJECTS.slice(0, 4);
-    return PROJECTS.filter((project) =>
-      `${project.title} ${project.kicker} ${project.tags.join(" ")}`
-        .toLowerCase()
-        .includes(normalized),
-    ).slice(0, 5);
+    return normalized
+      ? PROJECTS.filter((project) =>
+          `${project.title} ${project.kicker} ${project.tags.join(" ")}`
+            .toLowerCase()
+            .includes(normalized),
+        ).slice(0, 6)
+      : [];
   }, [query]);
-
   function submitSearch(event: FormEvent) {
     event.preventDefault();
-    if (suggestions[0]) router.push(`/projects/${suggestions[0].slug}`);
+    if (suggestions[0]) {
+      setOpen(false);
+      router.push(`/projects/${suggestions[0].slug}`);
+    }
   }
-
   function toggleTheme() {
-    const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    document.documentElement.dataset.theme = next;
-    window.localStorage.setItem("portfolio-theme", next);
-    document.documentElement.classList.toggle("dark", next === "dark");
+    setTheme(theme === "dark" ? "light" : "dark");
   }
 
   return (
     <>
-      <FloatingNav pathname={pathname} onOpen={() => setOpen(true)} />
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            ref={dialogRef}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Navigation"
-            data-lenis-prevent
-            onClick={(event) => {
-              if ((event.target as HTMLElement).closest("a")) setOpen(false);
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") setOpen(false);
-              if (event.key === "Tab") {
-                const items =
-                  dialogRef.current?.querySelectorAll<HTMLElement>(
-                    "a,button,input",
-                  );
-                if (!items?.length) return;
-                const first = items[0],
-                  last = items[items.length - 1];
-                if (event.shiftKey && document.activeElement === first) {
-                  event.preventDefault();
-                  last.focus();
-                } else if (!event.shiftKey && document.activeElement === last) {
-                  event.preventDefault();
-                  first.focus();
-                }
-              }
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.28 }}
-            className="fixed inset-0 z-[70] overflow-y-auto bg-background/95 backdrop-blur-2xl"
-          >
-            <div className="mx-auto min-h-full max-w-6xl px-6 py-6">
-              <div className="flex items-center justify-between">
-                <Link
-                  href="/"
-                  className="text-sm font-black tracking-tight text-foreground"
+      <FloatingNav
+        pathname={pathname}
+        onOpen={() => {
+          setQuery("");
+          setLanguageOpen(false);
+          setOpen(true);
+        }}
+      />
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {open && (
+              <motion.div
+                className="navigation-overlay"
+                data-lenis-prevent
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: reduced ? 0 : 0.18 }}
+                onClick={(event) => {
+                  if (event.target === event.currentTarget) setOpen(false);
+                }}
+              >
+                <motion.div
+                  ref={dialogRef}
+                  className="navigation-panel"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="Navigation"
+                  initial={{
+                    opacity: 0,
+                    y: reduced ? 0 : "100%",
+                    scale: 1,
+                  }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{
+                    opacity: 0,
+                    y: reduced ? 0 : "100%",
+                    scale: 1,
+                  }}
+                  transition={{
+                    duration: reduced ? 0 : 0.35,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  onClick={(event) => {
+                    if ((event.target as HTMLElement).closest("a"))
+                      setOpen(false);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Escape") {
+                      event.stopPropagation();
+                      if (languageOpen) setLanguageOpen(false);
+                      else setOpen(false);
+                    }
+                    if (event.key === "Tab") {
+                      const items =
+                        dialogRef.current?.querySelectorAll<HTMLElement>(
+                          "a,button,input",
+                        );
+                      if (!items?.length) return;
+                      const first = items[0],
+                        last = items[items.length - 1];
+                      if (event.shiftKey && document.activeElement === first) {
+                        event.preventDefault();
+                        last.focus();
+                      } else if (
+                        !event.shiftKey &&
+                        document.activeElement === last
+                      ) {
+                        event.preventDefault();
+                        first.focus();
+                      }
+                    }
+                  }}
                 >
-                  PUNEET<span className="text-primary">.</span>
-                </Link>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={toggleTheme}
-                    className="rounded-full border border-border px-4 py-2 text-sm text-muted transition hover:text-foreground"
-                    aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-                  >
-                    {theme === "dark" ? "Light mode" : "Dark mode"}
-                  </button>
-                  <button
-                    onClick={() => setOpen(false)}
-                    className="grid h-10 w-10 place-items-center rounded-full border border-border text-xl text-foreground"
-                    aria-label="Close navigation"
-                  >
-                    ×
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid gap-12 pb-10 pt-14 lg:grid-cols-[1.25fr_.75fr] lg:pt-20">
-                <div>
-                  <p className="font-mono text-xs uppercase tracking-[0.28em] text-primary">
-                    Pages
-                  </p>
-                  <div className="mt-5 divide-y divide-border border-y border-border">
-                    {PAGES.map((page, index) => (
-                      <motion.div
-                        key={page.href}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.045 }}
-                      >
-                        <Link
-                          href={page.href}
-                          className="group flex items-center gap-5 py-4 md:py-5"
-                        >
-                          <span className="font-mono text-xs text-faint">
-                            {page.index}
-                          </span>
-                          <span className="font-display text-4xl font-bold tracking-tight text-foreground transition group-hover:translate-x-2 group-hover:text-primary md:text-6xl">
-                            {page.label}
-                          </span>
-                          <span className="ml-auto text-2xl text-faint transition group-hover:text-primary">
-                            ↗
-                          </span>
-                        </Link>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-8">
-                  <div>
-                    <p className="font-mono text-xs uppercase tracking-[0.28em] text-primary">
-                      Jump to a project
-                    </p>
-                    <form onSubmit={submitSearch} className="mt-4">
-                      <label className="sr-only" htmlFor="project-search">
-                        Search projects
-                      </label>
+                  <div className="navigation-top">
+                    <form onSubmit={submitSearch} className="navigation-search">
+                      <FiSearch aria-hidden="true" />
                       <input
-                        id="project-search"
+                        aria-label="Search projects"
+                        placeholder="Jump to a project..."
                         value={query}
                         onChange={(event) => setQuery(event.target.value)}
-                        placeholder="Search by title or technology…"
-                        className="w-full rounded-2xl border border-border bg-card/60 px-4 py-3.5 text-base text-foreground outline-none transition placeholder:text-faint focus:border-primary"
                       />
                     </form>
-                    <div className="mt-3 space-y-1">
-                      {suggestions.map((project) => (
-                        <Link
-                          key={project.slug}
-                          href={`/projects/${project.slug}`}
-                          className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-muted transition hover:bg-card hover:text-foreground"
-                        >
-                          <span>{project.title}</span>
-                          <span className="font-mono text-[10px] uppercase tracking-wider text-faint">
-                            {project.kicker}
-                          </span>
-                        </Link>
-                      ))}
+                    <Link href="/contact" className="navigation-reach">
+                      Reach out
+                    </Link>
+                    <div className="navigation-language">
+                      <button
+                        className="navigation-icon"
+                        aria-label="Language"
+                        aria-expanded={languageOpen}
+                        onClick={() => setLanguageOpen(!languageOpen)}
+                      >
+                        <FiGlobe />
+                      </button>
+                      {languageOpen && (
+                        <div className="navigation-language-menu">
+                          <button onClick={() => setLanguageOpen(false)}>
+                            <FiCheck /> English
+                          </button>
+                        </div>
+                      )}
                     </div>
+                    <button
+                      className="navigation-icon"
+                      onClick={toggleTheme}
+                      aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+                    >
+                      {theme === "dark" ? <FiSun /> : <FiMoon />}
+                    </button>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-6 border-t border-border pt-6">
-                    <div>
-                      <p className="font-mono text-xs uppercase tracking-[0.24em] text-faint">
-                        Connect
-                      </p>
-                      <div className="mt-3 flex flex-col gap-2">
-                        {SOCIALS.map((social) => (
-                          <a
-                            key={social.label}
-                            href={social.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-muted hover:text-primary"
+                  {query.trim() ? (
+                    <section className="navigation-section">
+                      <h2>Projects</h2>
+                      <div className="navigation-results">
+                        {suggestions.map((project) => (
+                          <Link
+                            key={project.slug}
+                            href={`/projects/${project.slug}`}
                           >
-                            {social.label} ↗
-                          </a>
+                            <FiFolder />
+                            <span>
+                              {project.title}
+                              <small>{project.kicker}</small>
+                            </span>
+                          </Link>
+                        ))}
+                        {!suggestions.length && (
+                          <p>
+                            No projects found. Try another title or technology.
+                          </p>
+                        )}
+                      </div>
+                    </section>
+                  ) : (
+                    <section className="navigation-section">
+                      <h2>Pages</h2>
+                      <div className="navigation-pages">
+                        {PAGES.map(({ href, label, icon: Icon }) => (
+                          <Link
+                            key={href}
+                            href={href}
+                            aria-current={
+                              (pathname.replace(/\/$/, "") || "/") === href
+                                ? "page"
+                                : undefined
+                            }
+                          >
+                            <Icon aria-hidden="true" />
+                            {label}
+                          </Link>
                         ))}
                       </div>
-                    </div>
-                    <div>
-                      <p className="font-mono text-xs uppercase tracking-[0.24em] text-faint">
-                        Legal
-                      </p>
-                      <div className="mt-3 flex flex-col gap-2">
-                        <Link
-                          href="/privacy"
-                          className="text-sm text-muted hover:text-primary"
+                    </section>
+                  )}
+                  <section className="navigation-section">
+                    <h2>Connect</h2>
+                    <div className="navigation-chips">
+                      {SOCIALS.map(({ label, href, icon: Icon }) => (
+                        <a
+                          key={label}
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
                         >
-                          Privacy
-                        </Link>
-                        <Link
-                          href="/terms"
-                          className="text-sm text-muted hover:text-primary"
-                        >
-                          Terms
-                        </Link>
-                      </div>
+                          <Icon aria-hidden="true" />
+                          {label}
+                        </a>
+                      ))}
                     </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
+                  </section>
+                  <section className="navigation-section">
+                    <h2>Legal</h2>
+                    <div className="navigation-chips">
+                      <Link href="/privacy">
+                        <FiShield />
+                        Privacy Policy
+                      </Link>
+                      <Link href="/terms">
+                        <FiFileText />
+                        Terms of Use
+                      </Link>
+                    </div>
+                  </section>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
     </>
   );
 }

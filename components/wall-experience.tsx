@@ -1,153 +1,430 @@
 "use client";
-
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
-import { FormEvent, PointerEvent, useEffect, useRef, useState } from "react";
+import { FiEdit2 } from "react-icons/fi";
+import { WallComposer } from "./wall-composer";
+import { WallPins, WallSkeleton } from "./wall-pins";
+import type { DrawingDocument } from "@/lib/drawing";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import type { User } from "@supabase/supabase-js";
 
-type WallNote = {
-  id: string;
-  name: string;
-  message: string;
-  color: string;
-  date: string;
-  drawing?: string;
-};
+import { getSupabase } from "@/lib/supabase";
+import {
+  wallGradient,
+  WALL_COLORS,
+  wallNote,
+  wallError,
+  type WallNote,
+  type WallRow,
+} from "@/lib/wall";
 
-const STARTER_NOTES: WallNote[] = [
-  { id: "starter-1", name: "Puneet", message: "Keep solving. Keep shipping.", color: "#4d2b80", date: "Sep 2026" },
-  { id: "starter-2", name: "Contest notebook", message: "One clean observation can unlock the whole problem.", color: "#145a75", date: "Sep 2026" },
-  { id: "starter-3", name: "Build log", message: "Make the first version work. Then make it memorable.", color: "#7a254d", date: "Sep 2026" },
-];
-
-const COLORS = ["#4d2b80", "#145a75", "#7a254d", "#79561d", "#245645"];
+function displayName(user: User) {
+  const value = String(
+    user.user_metadata.full_name ?? user.user_metadata.user_name ?? "",
+  )
+    .trim()
+    .slice(0, 40);
+  return value.length >= 2 ? value : "Visitor";
+}
 
 export function WallExperience() {
-  const [notes, setNotes] = useState<WallNote[]>(STARTER_NOTES);
-  const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [message, setMessage] = useState("");
-  const [color, setColor] = useState(COLORS[0]);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const drawingRef = useRef(false);
+  const reduced = useReducedMotion();
+  const [notes, setNotes] = useState<WallNote[]>([]);
+  const [user, setUser] = useState<User | null>(null);
+  const [open, setOpen] = useState(false),
+    [name, setName] = useState(""),
+    [message, setMessage] = useState(""),
+    [color, setColor] = useState(WALL_COLORS[0]);
+  const [busy, setBusy] = useState(false),
+    [authReady, setAuthReady] = useState(false),
+    [error, setError] = useState(""),
+    [notice, setNotice] = useState("");
+  const [loadError, setLoadError] = useState(false),
+    [reload, setReload] = useState(0),
+    [loading, setLoading] = useState(true),
+    [limit, setLimit] = useState(60),
+    [hasMore, setHasMore] = useState(false);
+  const lock = useRef(false),
+    account = useRef<string | null>(null);
+  const [drawing, setDrawing] = useState<string | null>(null);
+  const [drawingDocument, setDrawingDocument] = useState<DrawingDocument>();
 
   useEffect(() => {
-    // Restore browser-only notes after hydration; cancel on unmount.
-    const frame = requestAnimationFrame(() => {
-    const stored = window.localStorage.getItem("puneet-wall-notes");
-    if (stored) {
-      try {
-        setNotes([...JSON.parse(stored), ...STARTER_NOTES]);
-      } catch {
-        window.localStorage.removeItem("puneet-wall-notes");
-      }
+    const client = getSupabase();
+    if (!client) {
+      const timer = setTimeout(() => setAuthReady(true), 0);
+      return () => clearTimeout(timer);
     }
+    const {
+      data: { subscription },
+    } = client.auth.onAuthStateChange((_event, session) => {
+      if (account.current !== (session?.user.id ?? null)) {
+        setMessage("");
+        setDrawing(null);
+        setDrawingDocument(undefined);
+        account.current = session?.user.id ?? null;
+      }
+      setUser(session?.user ?? null);
+      setName(session?.user ? displayName(session.user) : "");
+      setAuthReady(true);
+      // Drop cached private notes immediately when the account changes or expires.
+      setNotes((current) =>
+        current.filter(
+          (note) =>
+            !note.owner || note.approved || note.owner === session?.user.id,
+        ),
+      );
+      if (session?.user && sessionStorage.getItem("wall-compose") === "yes") {
+        sessionStorage.removeItem("wall-compose");
+        setOpen(true);
+      }
     });
-    return () => cancelAnimationFrame(frame);
+    client.auth.getSession().then(
+      ({ error }) => {
+        if (error) {
+          setAuthReady(true);
+          setError("Sign-in could not be completed. Please try again.");
+        }
+      },
+      () => {
+        setAuthReady(true);
+        setError("Sign-in could not be completed. Please try again.");
+      },
+    );
+    const url = new URL(window.location.href);
+    const fragment = new URLSearchParams(url.hash.slice(1));
+    if (url.searchParams.has("error") || fragment.has("error")) {
+      const timer = setTimeout(() => {
+        setError(
+          "Sign-in was cancelled or could not be completed. Please try again.",
+        );
+        setOpen(true);
+      }, 0);
+      // Remove provider error details rather than rendering untrusted URL messages.
+      url.search = "";
+      url.hash = "";
+      history.replaceState(null, "", url.pathname);
+      return () => {
+        clearTimeout(timer);
+        subscription.unsubscribe();
+      };
+    }
+    return () => subscription.unsubscribe();
   }, []);
 
-  function point(event: PointerEvent<HTMLCanvasElement>) {
-    const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
-    const rect = canvas.getBoundingClientRect();
-    return { x: (event.clientX - rect.left) * (canvas.width / rect.width), y: (event.clientY - rect.top) * (canvas.height / rect.height) };
-  }
-
-  function startDrawing(event: PointerEvent<HTMLCanvasElement>) {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-    if (!canvas || !context) return;
-    drawingRef.current = true;
-    canvas.setPointerCapture(event.pointerId);
-    const p = point(event);
-    context.beginPath();
-    context.moveTo(p.x, p.y);
-  }
-
-  function draw(event: PointerEvent<HTMLCanvasElement>) {
-    const context = canvasRef.current?.getContext("2d");
-    if (!context || !drawingRef.current) return;
-    const p = point(event);
-    context.lineTo(p.x, p.y);
-    context.strokeStyle = "#17171b";
-    context.lineWidth = 4;
-    context.lineCap = "round";
-    context.lineJoin = "round";
-    context.stroke();
-  }
-
-  function stopDrawing() {
-    drawingRef.current = false;
-  }
-
-  function clearCanvas() {
-    const canvas = canvasRef.current;
-    canvas?.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
-  }
-
-  function submit(event: FormEvent) {
-    event.preventDefault();
-    if (!name.trim() || !message.trim()) return;
-    const canvas = canvasRef.current;
-    const isBlank = !canvas?.getContext("2d")?.getImageData(0, 0, canvas.width, canvas.height).data.some((value) => value !== 0);
-    const note: WallNote = {
-      id: crypto.randomUUID(),
-      name: name.trim().slice(0, 40),
-      message: message.trim().slice(0, 220),
-      color,
-      date: new Intl.DateTimeFormat("en", { month: "short", year: "numeric" }).format(new Date()),
-      drawing: canvas && !isBlank ? canvas.toDataURL("image/png") : undefined,
+  useEffect(() => {
+    const client = getSupabase();
+    if (!authReady) return;
+    if (!client) {
+      const timer = setTimeout(() => setLoading(false), 0);
+      return () => clearTimeout(timer);
+    }
+    let cancelled = false;
+    const controller = new AbortController();
+    const timer = setTimeout(() => setLoading(true), 0);
+    client
+      .from("wall_notes")
+      .select(
+        "id,user_id,author_name,message,color,drawing,created_at,approved",
+      )
+      .order("created_at", { ascending: false })
+      .limit(limit + 1)
+      .abortSignal(controller.signal)
+      .then(
+        ({ data, error }) => {
+          if (cancelled) return;
+          clearTimeout(timer);
+          setLoading(false);
+          setLoadError(Boolean(error));
+          if (!error) {
+            setHasMore((data?.length ?? 0) > limit);
+            setNotes(
+              (data ?? [])
+                .slice(0, limit)
+                .map((row) => wallNote(row as WallRow)),
+            );
+          }
+        },
+        () => {
+          if (!cancelled) {
+            clearTimeout(timer);
+            setLoading(false);
+            setLoadError(true);
+          }
+        },
+      );
+    return () => {
+      cancelled = true;
+      controller.abort();
+      clearTimeout(timer);
     };
-    const personal = [note, ...notes.filter((item) => !item.id.startsWith("starter-"))].slice(0, 12);
-    window.localStorage.setItem("puneet-wall-notes", JSON.stringify(personal));
-    setNotes([note, ...notes]);
-    setName("");
-    setMessage("");
-    clearCanvas();
-    setOpen(false);
-  }
+  }, [user?.id, reload, authReady, limit]);
 
+  async function login(provider: "google" | "github") {
+    if (lock.current) return;
+    const client = getSupabase();
+    if (!client) {
+      setError("Sign-in is temporarily unavailable. Please come back soon.");
+      return;
+    }
+    lock.current = true;
+    setBusy(true);
+    setError("");
+    sessionStorage.setItem("wall-compose", "yes");
+    try {
+      const { error } = await client.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: `${window.location.origin}/wall/` },
+      });
+      if (error) throw error;
+    } catch {
+      sessionStorage.removeItem("wall-compose");
+      setError("Unable to start sign-in. Please try again.");
+      setBusy(false);
+      lock.current = false;
+    }
+  }
+  async function signOut() {
+    const client = getSupabase();
+    if (!client) return;
+    try {
+      const { error } = await client.auth.signOut({ scope: "local" });
+      if (error) throw error;
+      setUser(null);
+      setReload((n) => n + 1);
+      setOpen(false);
+      setNotice("Signed out.");
+    } catch {
+      setNotice("Could not sign out. Please try again.");
+    }
+  }
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (lock.current) return;
+    const client = getSupabase();
+    if (!client || !user) {
+      setError("Please sign in before pinning a note.");
+      return;
+    }
+    if (
+      name.trim().length < 2 ||
+      name.length > 40 ||
+      (!message.trim() && !drawing) ||
+      message.length > 200
+    ) {
+      setError(
+        "Enter a name (2–40 characters) and a message (up to 200 characters) or drawing.",
+      );
+      return;
+    }
+    if (drawing && drawing.length > 200000) {
+      setError("This drawing is too large. Please simplify it and try again.");
+      return;
+    }
+    lock.current = true;
+    setBusy(true);
+    setError("");
+    const authorId = user.id;
+    try {
+      const version = await client.rpc("wall_api_version");
+      if (account.current !== authorId) return;
+      if (version.error || version.data !== 3) {
+        setError(
+          version.error && version.error.code !== "PGRST202"
+            ? "Could not connect to the wall. Your draft is safe; please try again."
+            : "The wall needs a database update before it can accept pins. Your draft is safe. Please try again after the site owner applies the instant-pins update.",
+        );
+        return;
+      }
+      const { data, error } = await client.rpc("submit_wall_note", {
+        p_name: name.trim(),
+        p_message: message.trim(),
+        p_color: color,
+        p_drawing: drawing,
+      });
+      if (account.current !== authorId) return;
+      if (error) {
+        setError(wallError(error.code));
+        return;
+      }
+      const row = (Array.isArray(data) ? data[0] : data) as WallRow;
+      if (!row?.id) {
+        setError(
+          "Your note could not be confirmed. Refresh the wall before trying again.",
+        );
+        return;
+      }
+      setNotes((current) => [
+        wallNote(row),
+        ...current.filter((note) => note.id !== row.id),
+      ]);
+      setMessage("");
+      setDrawing(null);
+      setDrawingDocument(undefined);
+      setOpen(false);
+      setNotice("Pinned to the wall.");
+    } catch {
+      setError("The connection was interrupted. Please try again.");
+    } finally {
+      lock.current = false;
+      setBusy(false);
+    }
+  }
+  async function removeNote(id: string) {
+    if (lock.current) return;
+    const client = getSupabase();
+    if (!client) return;
+    lock.current = true;
+    try {
+      const { error } = await client.from("wall_notes").delete().eq("id", id);
+      if (error) throw error;
+      setNotes((current) => current.filter((note) => note.id !== id));
+      setNotice("Your note was removed.");
+    } catch {
+      setNotice("Your note could not be removed. Please try again.");
+    } finally {
+      lock.current = false;
+    }
+  }
+  function openComposer() {
+    setError("");
+    setOpen(true);
+
+    if (user) setName(displayName(user));
+  }
   return (
     <>
-      <div className="mx-auto max-w-6xl px-6 pb-28">
-        <div className="mb-8 flex flex-col items-center justify-between gap-4 rounded-2xl border border-border bg-card/45 p-5 text-center sm:flex-row sm:text-left">
-          <p className="max-w-2xl text-sm leading-relaxed text-muted">This safe preview wall stores your note only in this browser. It does not upload personal data or publish unmoderated content.</p>
-          <button onClick={() => setOpen(true)} className="shrink-0 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:-translate-y-0.5">✎ Pin something</button>
-        </div>
-
-        <div className="columns-1 gap-5 sm:columns-2 lg:columns-3">
+      <div className="visitor-wall">
+        <motion.header
+          className="visitor-wall-header"
+          initial={{ opacity: 0, y: reduced ? 0 : 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reduced ? 0 : 0.5 }}
+        >
+          <p className="visitor-wall-eyebrow">The wall remembers</p>
+          <h1>
+            Words Left in the <span>Ruins</span>
+          </h1>
+          <div className="visitor-wall-pin-wrap">
+            <button
+              onClick={openComposer}
+              disabled={!authReady}
+              className="visitor-wall-pin"
+            >
+              <FiEdit2 aria-hidden="true" /> Pin Something
+            </button>
+          </div>
+        </motion.header>
+        {notice && (
+          <p role="status" className="mb-6 text-sm text-primary">
+            {notice}
+          </p>
+        )}
+        {loading && notes.length === 0 && <WallSkeleton />}
+        {loading && notes.length > 0 && (
+          <p role="status" className="sr-only">
+            Updating visitor pins...
+          </p>
+        )}
+        {loadError && (
+          <p role="alert" className="mb-6 text-sm text-muted">
+            The visitor wall could not be loaded.{" "}
+            <button
+              onClick={() => setReload((n) => n + 1)}
+              className="text-primary underline"
+            >
+              Try again
+            </button>
+          </p>
+        )}
+        {!loading && !loadError && notes.length === 0 && (
+          <p className="visitor-wall-empty">
+            The wall is waiting for its first mark. Leave a thought, a hello, or
+            a little drawing.
+          </p>
+        )}
+        <WallPins>
           {notes.map((note, index) => (
-            <motion.figure key={note.id} initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(index, 7) * 0.04 }} className="mb-5 break-inside-avoid overflow-hidden rounded-[1.6rem] border border-white/10 p-5 text-white shadow-xl" style={{ background: `linear-gradient(145deg, ${note.color}, color-mix(in srgb, ${note.color} 72%, #09090b))` }}>
-              {note.drawing && <div className="mb-5 overflow-hidden rounded-xl bg-white"><Image src={note.drawing} width={800} height={360} unoptimized alt={`Doodle by ${note.name}`} className="aspect-[4/3] w-full object-contain" /></div>}
-              <blockquote className="text-lg font-semibold leading-relaxed">{note.message}</blockquote>
-              <figcaption className="mt-7 flex items-end justify-between border-t border-white/15 pt-4">
-                <span className="text-sm font-semibold">{note.name}</span>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-white/60">{note.date}</span>
+            <motion.figure
+              key={note.id}
+              initial={{ opacity: 0, y: reduced ? 0 : 22 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: reduced ? 0 : 0.3,
+                delay: reduced ? 0 : Math.min(index, 7) * 0.04,
+              }}
+              className="visitor-wall-note"
+              whileHover={reduced ? undefined : { y: -4 }}
+              style={{
+                background: wallGradient(note.color),
+              }}
+            >
+              {note.drawing && (
+                <div className="overflow-hidden rounded-xl bg-white">
+                  <Image
+                    src={note.drawing}
+                    width={900}
+                    height={600}
+                    unoptimized
+                    alt={`Doodle by ${note.name}`}
+                    className="h-auto w-full object-contain"
+                  />
+                </div>
+              )}
+              {note.message && <blockquote>{note.message}</blockquote>}
+              <figcaption>
+                <span className="visitor-wall-avatar" aria-hidden="true">
+                  {note.name.slice(0, 1).toUpperCase()}
+                </span>
+                <span className="visitor-wall-author">
+                  {note.name}
+                  <time>{note.date}</time>
+                </span>
+                {user && note.owner === user.id && (
+                  <button
+                    onClick={() => removeNote(note.id)}
+                    className="visitor-wall-remove"
+                    aria-label={`Remove your note: ${note.message.slice(0, 30) || "drawing"}`}
+                  >
+                    Remove
+                  </button>
+                )}
               </figcaption>
             </motion.figure>
           ))}
-        </div>
+        </WallPins>
+        {hasMore && (
+          <button
+            className="visitor-wall-more"
+            disabled={loading}
+            onClick={() => setLimit((n) => n + 60)}
+          >
+            Load more pins
+          </button>
+        )}
       </div>
-
       <AnimatePresence>
         {open && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[80] grid place-items-center overflow-y-auto bg-background/90 p-5 backdrop-blur-xl" role="dialog" aria-modal="true" aria-label="Pin a note to the wall">
-            <motion.form onSubmit={submit} initial={{ opacity: 0, y: 28, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20 }} className="my-6 w-full max-w-2xl rounded-[2rem] border border-border bg-card p-6 shadow-2xl md:p-8">
-              <div className="flex items-start justify-between gap-4">
-                <div><p className="font-mono text-xs uppercase tracking-[0.24em] text-primary">New pin</p><h2 className="mt-2 font-display text-3xl font-bold text-foreground">Leave a note or doodle</h2></div>
-                <button type="button" onClick={() => setOpen(false)} className="grid h-10 w-10 place-items-center rounded-full border border-border text-xl text-muted" aria-label="Close">×</button>
-              </div>
-              <div className="mt-7 grid gap-5 sm:grid-cols-2">
-                <label className="text-sm text-muted">Name<input value={name} onChange={(event) => setName(event.target.value)} maxLength={40} required className="mt-2 w-full rounded-xl border border-border bg-background/60 px-4 py-3 text-base text-foreground outline-none focus:border-primary" placeholder="Your name" /></label>
-                <label className="text-sm text-muted">Card color<span className="mt-3 flex gap-2">{COLORS.map((option) => <button key={option} type="button" onClick={() => setColor(option)} aria-label={`Choose ${option}`} className={`h-9 w-9 rounded-full border-2 ${color === option ? "border-white" : "border-transparent"}`} style={{ background: option }} />)}</span></label>
-              </div>
-              <label className="mt-5 block text-sm text-muted">Message<textarea value={message} onChange={(event) => setMessage(event.target.value)} maxLength={220} required className="mt-2 min-h-28 w-full resize-y rounded-xl border border-border bg-background/60 px-4 py-3 text-base text-foreground outline-none focus:border-primary" placeholder="A thought, hello, or tiny piece of advice…" /></label>
-              <div className="mt-5">
-                <div className="mb-2 flex items-center justify-between"><span className="text-sm text-muted">Optional doodle</span><button type="button" onClick={clearCanvas} className="text-xs text-faint hover:text-primary">Clear canvas</button></div>
-                <canvas ref={canvasRef} width={800} height={360} onPointerDown={startDrawing} onPointerMove={draw} onPointerUp={stopDrawing} onPointerCancel={stopDrawing} className="aspect-[20/9] w-full touch-none rounded-xl bg-white" aria-label="Drawing canvas" />
-              </div>
-              <div className="mt-6 flex justify-end"><button type="submit" className="rounded-full bg-primary px-7 py-3 text-sm font-semibold text-white">Pin to my wall</button></div>
-            </motion.form>
-          </motion.div>
+          <WallComposer
+            key={user?.id ?? "guest"}
+            name={user ? name : null}
+            message={message}
+            color={color}
+            drawing={drawing}
+            document={drawingDocument}
+            busy={busy}
+            error={error}
+            onClose={() => setOpen(false)}
+            onLogin={login}
+            onSignOut={signOut}
+            onMessage={setMessage}
+            onColor={setColor}
+            onDrawing={(document, image) => {
+              setDrawingDocument(document);
+              setDrawing(image);
+            }}
+            onSubmit={submit}
+          />
         )}
       </AnimatePresence>
     </>

@@ -35,13 +35,13 @@ export function AboutClock() {
       >
         <defs>
           <linearGradient id="clock-metal" x2="1" y2="1">
-            <stop stopColor="#333" />
-            <stop offset=".5" stopColor="#aaa" />
-            <stop offset="1" stopColor="#333" />
+            <stop stopColor="var(--clock-metal-edge)" />
+            <stop offset=".5" stopColor="var(--clock-metal-light)" />
+            <stop offset="1" stopColor="var(--clock-metal-edge)" />
           </linearGradient>
           <radialGradient id="clock-dial">
-            <stop stopColor="#111" />
-            <stop offset="1" stopColor="#050505" />
+            <stop stopColor="var(--clock-face-center)" />
+            <stop offset="1" stopColor="var(--clock-face-edge)" />
           </radialGradient>
           <filter id="clock-lume">
             <feGaussianBlur stdDeviation="2" />
@@ -64,7 +64,7 @@ export function AboutClock() {
           cy="180"
           r="171"
           fill="none"
-          stroke="#444"
+          stroke="var(--clock-ring)"
           strokeWidth="3"
         />
         {[...Array(60)].map((_, i) => (
@@ -74,7 +74,7 @@ export function AboutClock() {
             y1={i % 5 ? 23 : 31}
             x2="180"
             y2="16"
-            stroke={i % 5 ? "#333" : "#aaa"}
+            stroke={i % 5 ? "var(--clock-tick)" : "var(--clock-hand)"}
             strokeWidth={i % 5 ? 0.7 : 2.2}
             transform={"rotate(" + i * 6 + " 180 180)"}
           />
@@ -85,7 +85,7 @@ export function AboutClock() {
             x={Number((180 + 130 * Math.sin((i * Math.PI) / 6)).toFixed(4))}
             y={Number((185 - 130 * Math.cos((i * Math.PI) / 6)).toFixed(4))}
             textAnchor="middle"
-            fill="#777"
+            fill="var(--clock-label)"
             fontSize="11"
           >
             {i || 12}
@@ -95,20 +95,26 @@ export function AboutClock() {
           x="180"
           y="99"
           textAnchor="middle"
-          fill="#999"
+          fill="var(--clock-label)"
           fontSize="10"
           letterSpacing="3"
         >
           JAIPUR
         </text>
-        <circle cx="119" cy="180" r="27" fill="#0c0c0c" stroke="#222" />
-        <circle cx="117" cy="176" r="14" fill="#a4b5a8" />
-        <circle cx="125" cy="170" r="14" fill="#0c0c0c" />
+        <circle
+          cx="119"
+          cy="180"
+          r="27"
+          fill="var(--clock-inset)"
+          stroke="var(--clock-ring)"
+        />
+        <circle cx="117" cy="176" r="14" fill="var(--clock-moon)" />
+        <circle cx="125" cy="170" r="14" fill="var(--clock-inset)" />
         <text
           x="119"
           y="200"
           textAnchor="middle"
-          fill="#555"
+          fill="var(--clock-label)"
           fontSize="6"
           letterSpacing="2"
         >
@@ -120,10 +126,16 @@ export function AboutClock() {
           width="39"
           height="27"
           rx="4"
-          fill="#131313"
-          stroke="#292929"
+          fill="var(--clock-inset)"
+          stroke="var(--clock-ring)"
         />
-        <text x="241" y="184" textAnchor="middle" fill="#bbb" fontSize="14">
+        <text
+          x="241"
+          y="184"
+          textAnchor="middle"
+          fill="var(--clock-label)"
+          fontSize="14"
+        >
           {date
             ? new Intl.DateTimeFormat("en", {
                 timeZone: "Asia/Kolkata",
@@ -135,7 +147,7 @@ export function AboutClock() {
           x="180"
           y="256"
           textAnchor="middle"
-          fill="#777"
+          fill="var(--clock-label)"
           fontSize="9"
           letterSpacing="3"
         >
@@ -151,12 +163,12 @@ export function AboutClock() {
         <g filter="url(#clock-lume)">
           <path
             d="M177 190 L178 96 L182 96 L183 190Z"
-            fill="#b7c6b8"
+            fill="var(--clock-hand)"
             transform={"rotate(" + (hours * 30 + minutes / 2) + " 180 180)"}
           />
           <path
             d="M178.5 196 L179 51 L181 51 L181.5 196Z"
-            fill="#bbc9bb"
+            fill="var(--clock-hand)"
             transform={"rotate(" + (minutes * 6 + seconds / 10) + " 180 180)"}
           />
         </g>
@@ -169,7 +181,7 @@ export function AboutClock() {
           strokeWidth="1.2"
           transform={"rotate(" + seconds * 6 + " 180 180)"}
         />
-        <circle cx="180" cy="180" r="5" fill="#aaa" />
+        <circle cx="180" cy="180" r="5" fill="var(--clock-metal-light)" />
         <circle cx="180" cy="180" r="2" fill="#d4547e" />
       </svg>
     </div>

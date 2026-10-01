@@ -18,37 +18,6 @@ export type Project = {
 
 export const PROJECTS: Project[] = [
   {
-    slug: "legal-document-assistant",
-    title: "Legal Document Assistant",
-    kicker: "Generative AI Web App",
-    period: "2026",
-    summary:
-      "A generative-AI web project focused on making legal documents easier to work with.",
-    overview:
-      "A dedicated legal-document assistant exploring how generative AI can make document workflows more approachable. The project has a Cloud Run deployment and a public GitHub repository.",
-    role: "Developer",
-    platform: "Web · Cloud Run",
-    status: "Project showcase",
-    tags: ["Generative AI", "Legal Documents", "Web App", "Cloud Run"],
-    features: [
-      "Dedicated web experience for a legal-document assistant",
-      "Generative AI applied to document workflows",
-    ],
-    links: [
-      {
-        label: "Open deployed app",
-        href: "https://frontend-35044873694.asia-south1.run.app/",
-      },
-      {
-        label: "View repository",
-        href: "https://github.com/puneet26082006/Legal-Documents-Gen-Ai-Project",
-      },
-    ],
-    palette: ["#142b49", "#b68a55"],
-    mark: "LA",
-    featured: true,
-  },
-  {
     slug: "smartflow-ai",
     title: "SmartFlow AI",
     kicker: "AI Productivity Platform",
@@ -77,6 +46,35 @@ export const PROJECTS: Project[] = [
     palette: ["#b93668", "#ef9f43"],
     mark: "SF",
     featured: true,
+  },
+  {
+    slug: "pixora-ai",
+    title: "Pixora AI",
+    kicker: "Creative AI Web App",
+    period: "2026",
+    summary:
+      "A polished background-removal workflow with authentication, cloud media storage, credits, payments, and automated processing.",
+    overview:
+      "Pixora turns a single-purpose AI capability into a complete product flow: sign in, upload, process, preview, download, and manage usage. The interface is responsive and the supporting services handle media storage, customer credits, and payments.",
+    role: "Full-stack Developer",
+    platform: "React · Web",
+    status: "Product build",
+    tags: ["React", "Supabase", "Cloudinary", "Razorpay", "n8n"],
+    features: [
+      "One-click AI background removal with clear before/after feedback",
+      "Supabase authentication and user-level credit tracking",
+      "Cloudinary-backed media uploads and transformed asset delivery",
+      "Razorpay checkout flow for subscription and credit purchases",
+      "n8n workflows coordinating processing and account updates",
+    ],
+    links: [
+      {
+        label: "Open live demo",
+        href: "https://tanstack-start-app.puneetsaxena168.workers.dev/",
+      },
+    ],
+    palette: ["#9a46d8", "#ef68a4"],
+    mark: "PX",
   },
   {
     slug: "fair-relief-routing",
@@ -109,6 +107,37 @@ export const PROJECTS: Project[] = [
     featured: true,
   },
   {
+    slug: "legal-document-assistant",
+    title: "Legal Document Assistant",
+    kicker: "Generative AI Web App",
+    period: "2026",
+    summary:
+      "A generative-AI web project focused on making legal documents easier to work with.",
+    overview:
+      "A dedicated legal-document assistant exploring how generative AI can make document workflows more approachable. The project has a Cloud Run deployment and a public GitHub repository.",
+    role: "Developer",
+    platform: "Web · Cloud Run",
+    status: "Project showcase",
+    tags: ["Generative AI", "Legal Documents", "Web App", "Cloud Run"],
+    features: [
+      "Dedicated web experience for a legal-document assistant",
+      "Generative AI applied to document workflows",
+    ],
+    links: [
+      {
+        label: "Open deployed app",
+        href: "https://frontend-35044873694.asia-south1.run.app/",
+      },
+      {
+        label: "View repository",
+        href: "https://github.com/puneet26082006/Legal-Documents-Gen-Ai-Project",
+      },
+    ],
+    palette: ["#142b49", "#b68a55"],
+    mark: "LA",
+    featured: true,
+  },
+  {
     slug: "honey-comb",
     title: "Honey Comb",
     kicker: "AI Scam Intelligence",
@@ -137,35 +166,6 @@ export const PROJECTS: Project[] = [
     palette: ["#d48b16", "#f5d04b"],
     mark: "HC",
     featured: true,
-  },
-  {
-    slug: "pixora-ai",
-    title: "Pixora AI",
-    kicker: "Creative AI Web App",
-    period: "2026",
-    summary:
-      "A polished background-removal workflow with authentication, cloud media storage, credits, payments, and automated processing.",
-    overview:
-      "Pixora turns a single-purpose AI capability into a complete product flow: sign in, upload, process, preview, download, and manage usage. The interface is responsive and the supporting services handle media storage, customer credits, and payments.",
-    role: "Full-stack Developer",
-    platform: "React · Web",
-    status: "Product build",
-    tags: ["React", "Supabase", "Cloudinary", "Razorpay", "n8n"],
-    features: [
-      "One-click AI background removal with clear before/after feedback",
-      "Supabase authentication and user-level credit tracking",
-      "Cloudinary-backed media uploads and transformed asset delivery",
-      "Razorpay checkout flow for subscription and credit purchases",
-      "n8n workflows coordinating processing and account updates",
-    ],
-    links: [
-      {
-        label: "Open live demo",
-        href: "https://tanstack-start-app.puneetsaxena168.workers.dev/",
-      },
-    ],
-    palette: ["#9a46d8", "#ef68a4"],
-    mark: "PX",
   },
   {
     slug: "virtual-herbal-garden",

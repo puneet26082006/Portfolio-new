@@ -114,9 +114,8 @@ export function Misc() {
           </defs>
         </svg>
         <div className="misc-note">
-          First, solve the problem.
-          <br />
-          Then, write the code.
+          Simplicity is a great virtue but it requires hard work to achieve it
+          and education to appreciate it.
         </div>
         <span className="misc-monogram">PS</span>
         <SiReact className="misc-tech misc-react" aria-label="React" />

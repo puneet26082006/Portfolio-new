@@ -1,0 +1,695 @@
+.wall-composer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 36px 24px;
+  background: #000a;
+  backdrop-filter: blur(14px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font-family: var(--font-inter), Arial, sans-serif;
+}
+.wall-composer {
+  position: relative;
+  width: min(560px, 100%);
+  padding: 32px 24px 20px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  box-shadow: 0 32px 100px #0009;
+  margin: auto;
+}
+.wall-composer::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 8px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--pin-color) 55%, #000),
+    var(--pin-color)
+  );
+  border-radius: 20px 20px 0 0;
+}
+.wall-composer-close {
+  position: absolute;
+  right: -16px;
+  top: -16px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-card);
+  color: var(--color-muted);
+  z-index: 1;
+  transition:
+    color 0.2s,
+    transform 0.2s;
+}
+.wall-composer-close:hover {
+  color: var(--color-foreground);
+  transform: rotate(90deg);
+}
+.wall-composer-close svg {
+  width: 20px;
+  height: 20px;
+}
+.wall-composer-person {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+  min-width: 0;
+}
+.wall-person-avatar {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: #8055bd;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 24px;
+}
+.wall-composer-person > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.45;
+}
+.wall-composer-person strong {
+  font-size: 18px;
+  color: var(--color-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.wall-composer-person > div > span {
+  font-size: 14px;
+  color: var(--color-faint);
+}
+.wall-composer-person > button {
+  margin-left: auto;
+  white-space: nowrap;
+  font-size: 14px;
+  color: var(--color-faint);
+  transition: color 0.2s;
+}
+.wall-composer-person > button:hover {
+  color: var(--color-foreground);
+}
+.wall-message-box {
+  position: relative;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  transition: border-color 0.2s;
+}
+.wall-message-box:focus-within {
+  border-color: var(--pin-color);
+}
+.wall-message-box textarea {
+  display: block;
+  width: 100%;
+  height: 104px;
+  padding: 16px 20px 30px;
+  background: transparent;
+  resize: none;
+  border: 0;
+  outline: 0;
+  color: var(--color-foreground);
+  font-size: 16px;
+  line-height: 1.5;
+}
+.wall-message-box textarea::placeholder {
+  color: var(--color-faint);
+}
+.wall-message-box > span {
+  position: absolute;
+  bottom: 2px;
+  right: 16px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-faint);
+  pointer-events: none;
+}
+.wall-draw-label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--color-muted);
+  font-size: 14px;
+  font-weight: 600;
+  margin: 26px 0 10px;
+}
+.wall-draw-label > button {
+  margin-left: auto;
+  padding: 4px;
+  color: var(--color-muted);
+}
+.wall-drawing-launch {
+  display: flex;
+  position: relative;
+  width: 100%;
+  height: 160px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  border: 2px dashed var(--color-border);
+  border-radius: 16px;
+  color: var(--color-muted);
+  overflow: hidden;
+  transition:
+    border-color 0.25s,
+    background 0.25s;
+}
+.wall-drawing-launch:hover {
+  border-color: #cf5280;
+  background: #cf528009;
+}
+.wall-drawing-launch > svg {
+  width: 34px;
+  height: 34px;
+}
+.wall-drawing-launch > span {
+  font-size: 16px;
+  font-weight: 600;
+}
+.wall-drawing-launch.has-drawing {
+  border-style: solid;
+  height: 180px;
+  background: var(--color-background-soft);
+}
+.wall-drawing-launch img {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+.wall-drawing-launch .wall-edit-drawing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: absolute;
+  bottom: 10px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #000c;
+  color: #fff;
+  font-size: 12px;
+}
+.wall-pin-colors {
+  margin: 20px 0;
+  border: 0;
+  padding: 0;
+}
+.wall-pin-colors legend {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-muted);
+  margin-bottom: 10px;
+}
+.wall-pin-colors > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.wall-pin-colors button {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  color: white;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+  box-shadow: 0 0 0 2px var(--color-card);
+}
+.wall-pin-colors button:hover {
+  transform: scale(1.12);
+}
+.wall-pin-colors button[aria-pressed="true"] {
+  box-shadow:
+    0 0 0 2px var(--color-card),
+    0 0 0 4px #c5b5dc;
+}
+.wall-pin-colors button svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 3;
+}
+.wall-pin-submit,
+.drawing-done {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #fff;
+  background: #cf5280;
+  font-weight: 700;
+  border-radius: 16px;
+  box-shadow: 0 3px 5px #cf52802b;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+.wall-pin-submit {
+  width: 100%;
+  height: 56px;
+  font-size: 17px;
+}
+.wall-pin-submit:hover,
+.drawing-done:hover {
+  background: #df6090;
+  transform: translateY(-1px);
+}
+.wall-pin-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}
+.wall-review-caption {
+  font-size: 11px;
+  text-align: center;
+  color: var(--color-faint);
+  margin-top: 10px;
+}
+.wall-compose-error {
+  color: #fb91ae;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+.wall-composer .wall-login h2 {
+  font-family: var(--font-display);
+  font-size: 30px;
+  color: var(--color-foreground);
+}
+.wall-composer button:focus-visible,
+.wall-drawing-board button:focus-visible,
+.wall-drawing-board canvas:focus-visible {
+  outline: 2px solid #fda4ca;
+  outline-offset: 4px;
+}
+.wall-drawing-board {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-inter), Arial, sans-serif;
+  outline: none;
+  isolation: isolate;
+}
+.drawing-topbar {
+  height: 96px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 28px;
+  background: var(--color-background);
+  z-index: 4;
+}
+.drawing-topbar h2 {
+  font-size: 17px;
+  font-weight: 700;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.drawing-topbar button {
+  height: 48px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+}
+.drawing-topbar svg {
+  width: 18px;
+  height: 18px;
+}
+.drawing-discard {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  color: var(--color-muted);
+  transition: color 0.2s;
+}
+.drawing-discard:hover {
+  color: var(--color-foreground);
+}
+.drawing-workspace {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  padding-left: 112px;
+  background-image: radial-gradient(
+    var(--color-border) 0.8px,
+    transparent 0.8px
+  );
+  background-size: 25px 25px;
+  background-position: 12px 12px;
+}
+.drawing-toolbar {
+  position: absolute;
+  left: 24px;
+  top: 26px;
+  bottom: 26px;
+  width: 68px;
+  max-height: 670px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 9px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-card);
+  overflow: auto;
+  scrollbar-width: none;
+  z-index: 5;
+}
+.drawing-toolbar button {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  color: var(--color-muted);
+  transition:
+    background 0.15s,
+    color 0.15s,
+    transform 0.15s;
+}
+.drawing-toolbar button:hover {
+  background: var(--color-card-soft);
+  color: var(--color-foreground);
+}
+.drawing-toolbar button[aria-pressed="true"] {
+  background: #cf5280;
+  color: #fff;
+  box-shadow: 0 3px 5px #cf52802b;
+}
+.drawing-toolbar button:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+.drawing-toolbar svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.8;
+}
+.drawing-divider {
+  height: 1px;
+  min-height: 1px;
+  width: 30px;
+  background: var(--color-border);
+  margin: 7px 0;
+}
+.drawing-ink-ring {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #a0a0aa;
+  border-radius: 50%;
+}
+.drawing-size-dot {
+  background: currentColor;
+  border-radius: 50%;
+}
+.drawing-paper-swatch {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #a0a0aa;
+  border-radius: 5px;
+}
+.drawing-scroll-area {
+  height: 100%;
+  overflow: auto;
+  padding: 48px 40px;
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y;
+}
+.drawing-paper-space {
+  width: calc(100% * var(--canvas-zoom));
+  min-height: calc(100% * var(--canvas-zoom));
+  display: grid;
+  place-items: center;
+}
+.drawing-paper {
+  display: block;
+  width: min(100%, calc((100dvh - 192px) * 1.5 * var(--canvas-zoom)));
+  height: auto;
+  aspect-ratio: 3/2;
+  border-radius: 7px;
+  box-shadow: 0 16px 80px #0005;
+  background: white;
+  touch-action: none;
+  user-select: none;
+  cursor: crosshair;
+}
+.drawing-cursor-text {
+  cursor: text;
+}
+.drawing-tool-panel {
+  position: absolute;
+  z-index: 6;
+  left: 104px;
+  top: 26px;
+  width: 250px;
+  max-height: calc(100% - 48px);
+  overflow: auto;
+  padding: 16px;
+  background: var(--color-background-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  box-shadow: 0 16px 60px #0009;
+}
+.drawing-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+.drawing-panel-heading > button {
+  padding: 4px;
+  color: var(--color-muted);
+}
+.drawing-swatches {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.drawing-swatches > button {
+  height: 32px;
+  width: 32px;
+  border: 1px solid #7776;
+  border-radius: 50%;
+}
+.drawing-custom-color {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+.drawing-custom-color input {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  margin-left: auto;
+}
+.drawing-width-label {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: 13px;
+}
+.drawing-width-label input {
+  accent-color: #cf5280;
+  width: 100%;
+}
+.drawing-width-label > span {
+  border: 1px solid #8886;
+  border-radius: 50%;
+  align-self: center;
+}
+.drawing-stickers {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.drawing-stickers button {
+  font-size: 26px;
+  border-radius: 8px;
+  padding: 4px;
+}
+.drawing-stickers button[aria-pressed="true"] {
+  background: #cf528044;
+}
+.drawing-tool-panel > input {
+  width: 100%;
+  border: 1px solid #444;
+  background: var(--color-card);
+  color: var(--color-foreground);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 16px;
+}
+.drawing-tool-panel > p {
+  font-size: 12px;
+  color: var(--color-muted);
+  line-height: 1.5;
+  margin-top: 12px;
+}
+.drawing-error {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 32px);
+  padding: 12px 18px;
+  border: 1px solid #cf5280;
+  border-radius: 12px;
+  background: #1a0a10;
+  color: #ffb8d1;
+  font-size: 13px;
+  z-index: 10;
+}
+@media (max-height: 760px) and (min-width: 701px) {
+  .drawing-toolbar {
+    gap: 0;
+    top: 12px;
+    bottom: 12px;
+    padding: 6px;
+  }
+  .drawing-toolbar button {
+    height: 38px;
+    min-height: 32px;
+  }
+  .drawing-divider {
+    margin: 4px 0;
+  }
+  .drawing-scroll-area {
+    padding: 24px;
+  }
+  .drawing-paper {
+    width: min(100%, calc((100dvh - 144px) * 1.5 * var(--canvas-zoom)));
+  }
+}
+@media (max-width: 700px) {
+  .wall-composer-overlay {
+    padding: 30px 20px;
+  }
+  .wall-composer {
+    padding: 28px 20px 16px;
+    border-radius: 20px;
+  }
+  .wall-composer-close {
+    right: -8px;
+    top: -16px;
+  }
+  .wall-composer-person {
+    gap: 10px;
+  }
+  .wall-composer-person strong {
+    font-size: 16px;
+  }
+  .wall-composer-person > button {
+    font-size: 12px;
+  }
+  .wall-pin-colors > div {
+    gap: 10px;
+  }
+  .wall-pin-colors button {
+    width: 32px;
+    height: 32px;
+  }
+  .wall-drawing-launch {
+    height: 150px;
+  }
+  .drawing-topbar {
+    height: 76px;
+    padding: 16px 12px;
+    gap: 8px;
+  }
+  .drawing-topbar button {
+    height: 42px;
+    padding: 0 12px;
+    font-size: 13px;
+    gap: 6px;
+    border-radius: 12px;
+  }
+  .drawing-topbar h2 {
+    font-size: 14px;
+  }
+  .drawing-workspace {
+    padding: 0 0 84px;
+  }
+  .drawing-toolbar {
+    top: auto;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+    height: 62px;
+    max-height: none;
+    flex-direction: row;
+    gap: 2px;
+    padding: 6px;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-radius: 18px;
+  }
+  .drawing-toolbar button {
+    width: 42px;
+    height: 44px;
+    border-radius: 12px;
+  }
+  .drawing-divider {
+    width: 1px;
+    min-width: 1px;
+    height: 28px;
+    margin: 0 5px;
+  }
+  .drawing-scroll-area {
+    padding: 20px 16px;
+  }
+  .drawing-paper {
+    width: 100%;
+    max-width: calc((100dvh - 200px) * 1.5 * var(--canvas-zoom));
+  }
+  .drawing-tool-panel {
+    left: 16px;
+    top: auto;
+    bottom: 86px;
+    width: min(280px, calc(100% - 32px));
+    max-height: calc(100% - 100px);
+  }
+  .drawing-error {
+    bottom: 90px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wall-composer-overlay *,
+  .wall-drawing-board * {
+    transition: none !important;
+  }
+}

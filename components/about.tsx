@@ -107,11 +107,18 @@ export function About() {
           <div className="orbital-content-end">
             <span className="quote-mark">“</span>
             <blockquote>
-              First, solve the problem.
-              <br />
-              Then, write the code.
+              Simplicity is a great virtue but it requires hard work to achieve
+              it and education to appreciate it.
             </blockquote>
-            <p>John Johnson</p>
+            <p>
+              <a
+                href="https://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD896.html"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Edsger W. Dijkstra
+              </a>
+            </p>
           </div>
         </Spotlight>
       </div>

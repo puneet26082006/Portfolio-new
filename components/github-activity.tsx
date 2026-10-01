@@ -7,7 +7,10 @@ type Day = { date: string; count: number; level: number };
 type Activity = { contributions: Day[]; total: Record<string, number> };
 type Stats = { followers: number; repos: number; stars: number | null };
 const USER = "puneet26082006";
-const COLORS = ["#1c1c1c", "#2a1520", "#3d1f2e", "#7a3050", "#d4547e"];
+const COLORS = Array.from(
+  { length: 5 },
+  (_, index) => `var(--contribution-${index})`,
+);
 export function GitHubActivity() {
   const [activity, setActivity] = useState<Activity | null>(null),
     [stats, setStats] = useState<Stats | null>(null),

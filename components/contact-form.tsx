@@ -1,32 +1,158 @@
 "use client";
-
-import { FormEvent, useState } from "react";
-
-const TOPICS = ["Internship", "Freelance project", "Collaboration", "Contest team", "Just saying hi"];
-
+import Link from "next/link";
+import { useRef, useState, type FormEvent } from "react";
+import { FiArrowUpRight, FiCheckCircle } from "react-icons/fi";
+import { sendContact } from "@/lib/contact-service";
+const TOPICS = [
+  "Internship / role",
+  "Freelance project",
+  "Just saying hi",
+  "Bug report",
+  "Other",
+];
 export function ContactForm() {
-  const [topic, setTopic] = useState(TOPICS[0]);
-
-  function submit(event: FormEvent<HTMLFormElement>) {
+  const [topic, setTopic] = useState("");
+  const [status, setStatus] = useState<
+    "idle" | "sending" | "success" | "error"
+  >("idle");
+  const [error, setError] = useState("");
+  const busy = useRef(false);
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const name = String(data.get("name") || "");
-    const email = String(data.get("email") || "");
-    const message = String(data.get("message") || "");
-    const subject = encodeURIComponent(`${topic} — message from ${name}`);
-    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\nTopic: ${topic}\n\n${message}`);
-    window.location.href = `mailto:puneetsaxena168@gmail.com?subject=${subject}&body=${body}`;
+    if (busy.current) return;
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    busy.current = true;
+    setStatus("sending");
+    setError("");
+    try {
+      await sendContact(
+        {
+          name: String(data.get("name") ?? ""),
+          email: String(data.get("email") ?? ""),
+          topic,
+          message: String(data.get("message") ?? ""),
+          consent: data.get("consent") === "on",
+          honeypot: String(data.get("_gotcha") ?? ""),
+        },
+        process.env.NEXT_PUBLIC_FORMSPREE_FORM_ID ?? "",
+      );
+      setStatus("success");
+      form.reset();
+      setTopic("");
+    } catch (err) {
+      setStatus("error");
+      setError(
+        err instanceof Error && err.name !== "TimeoutError"
+          ? err.message
+          : "The request timed out. Please try again or email me directly.",
+      );
+    } finally {
+      busy.current = false;
+    }
   }
-
   return (
-    <form onSubmit={submit} className="rounded-[2rem] border border-border bg-card/50 p-6 md:p-9">
-      <div className="grid gap-5 sm:grid-cols-2">
-        <label className="text-xs font-semibold uppercase tracking-[0.16em] text-faint">Name<input name="name" required maxLength={70} placeholder="Your name" className="mt-2 w-full rounded-xl border border-border bg-background/55 px-4 py-3.5 text-base font-normal normal-case tracking-normal text-foreground outline-none placeholder:text-faint focus:border-primary" /></label>
-        <label className="text-xs font-semibold uppercase tracking-[0.16em] text-faint">Email<input name="email" type="email" required placeholder="you@example.com" className="mt-2 w-full rounded-xl border border-border bg-background/55 px-4 py-3.5 text-base font-normal normal-case tracking-normal text-foreground outline-none placeholder:text-faint focus:border-primary" /></label>
-      </div>
-      <fieldset className="mt-6"><legend className="text-xs font-semibold uppercase tracking-[0.16em] text-faint">Topic</legend><div className="mt-3 flex flex-wrap gap-2">{TOPICS.map((item) => <button key={item} type="button" onClick={() => setTopic(item)} className={`rounded-full border px-4 py-2 text-sm transition ${topic === item ? "border-primary bg-primary text-white" : "border-border text-muted hover:text-foreground"}`}>{item}</button>)}</div></fieldset>
-      <label className="mt-6 block text-xs font-semibold uppercase tracking-[0.16em] text-faint">Message<textarea name="message" required maxLength={2000} placeholder="Tell me about the role, project, problem, or idea…" className="mt-2 min-h-40 w-full resize-y rounded-xl border border-border bg-background/55 px-4 py-3.5 text-base font-normal normal-case leading-relaxed tracking-normal text-foreground outline-none placeholder:text-faint focus:border-primary" /></label>
-      <div className="mt-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center"><p className="max-w-md text-xs leading-relaxed text-faint">Submitting opens your default email app. Nothing is stored by this website.</p><button type="submit" className="rounded-full bg-foreground px-7 py-3 text-sm font-semibold text-background transition hover:-translate-y-0.5">Prepare message ↗</button></div>
-    </form>
+    <div className="reference-contact-form">
+      <div className="form-aurora form-aurora-pink" />
+      <div className="form-aurora form-aurora-green" />
+      {status === "success" ? (
+        <div className="contact-success" role="status">
+          <FiCheckCircle />
+          <h2>Message sent.</h2>
+          <p>
+            Thanks for reaching out. I&apos;ll reply to the email address you
+            provided.
+          </p>
+          <button
+            className="reference-button"
+            onClick={() => setStatus("idle")}
+          >
+            Send another message
+          </button>
+        </div>
+      ) : (
+        <form
+          onSubmit={submit}
+          className="contact-fields"
+          aria-busy={status === "sending"}
+        >
+          <div className="contact-name-email">
+            <label>
+              Name
+              <input
+                name="name"
+                autoComplete="name"
+                required
+                minLength={2}
+                maxLength={70}
+                placeholder="Jane Doe"
+              />
+            </label>
+            <label>
+              Email
+              <input
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                maxLength={254}
+                placeholder="jane@example.com"
+              />
+            </label>
+          </div>
+          <fieldset>
+            <legend>Topic</legend>
+            <div className="contact-topic-pills">
+              {TOPICS.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  aria-pressed={topic === item}
+                  onClick={() => setTopic(item)}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+          <label>
+            Message
+            <textarea
+              name="message"
+              required
+              minLength={10}
+              maxLength={2000}
+              placeholder="Tell me about your idea, project, or opportunity..."
+            />
+          </label>
+          <div className="contact-honeypot" aria-hidden="true">
+            <label>
+              Leave this empty
+              <input name="_gotcha" tabIndex={-1} autoComplete="off" />
+            </label>
+          </div>
+          <label className="contact-consent">
+            <input name="consent" type="checkbox" required />
+            <span>
+              I agree that my submitted data is collected and stored to respond
+              to my inquiry. <Link href="/privacy/">Privacy policy</Link>
+            </span>
+          </label>
+          {error && (
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+          )}
+          <button
+            type="submit"
+            className="contact-submit"
+            disabled={status === "sending"}
+          >
+            {status === "sending" ? "Sending…" : "Send Message"}
+            <FiArrowUpRight />
+          </button>
+        </form>
+      )}
+    </div>
   );
 }

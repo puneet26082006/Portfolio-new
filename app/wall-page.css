@@ -1,0 +1,246 @@
+.visitor-wall {
+  padding: 80px 24px 112px;
+  max-width: 1280px;
+  margin-inline: auto;
+  min-height: 75vh;
+}
+.visitor-wall-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.visitor-wall-eyebrow {
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.visitor-wall-header h1 {
+  font-family: var(--font-playfair), serif;
+  font-size: 60px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  margin-bottom: 32px;
+}
+.visitor-wall-header h1 span {
+  font-style: italic;
+  background: linear-gradient(to right, #ff0099, #ff9ad2);
+  background-clip: text;
+  color: transparent;
+  padding: 4px 16px;
+  margin: -4px -8px;
+}
+.visitor-wall-pin-wrap {
+  display: inline-flex;
+  position: relative;
+  padding: 8px 0;
+}
+.visitor-wall-pin-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 12px 8px;
+  background: #cf5280;
+  opacity: 0.35;
+  filter: blur(24px);
+  border-radius: 999px;
+  animation: wall-pin-glow 3s ease-in-out infinite;
+  pointer-events: none;
+}
+.visitor-wall-pin {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 32px;
+  border-radius: 999px;
+  background: #cf5280;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+.visitor-wall-pin:hover {
+  transform: translateY(-2px);
+  background: #da638f;
+}
+.visitor-wall-pin:disabled {
+  opacity: 0.5;
+}
+.visitor-wall-pin svg {
+  width: 18px;
+  height: 18px;
+}
+.visitor-wall-empty {
+  max-width: 390px;
+  margin: 48px auto 100px;
+  text-align: center;
+  color: var(--color-muted);
+  font-size: 14px;
+  line-height: 1.8;
+}
+.visitor-wall-note {
+  border-radius: 16px;
+  padding: 20px;
+  color: white;
+  min-height: 160px;
+  display: inline-flex;
+  width: 100%;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: box-shadow 0.3s;
+}
+.visitor-wall-note:hover {
+  box-shadow: 0 12px 30px #0006;
+}
+.visitor-wall-note blockquote {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.625;
+  padding: 16px 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  flex: 1;
+}
+.visitor-wall-note figcaption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid #ffffff1a;
+  padding-top: 12px;
+  margin-top: 12px;
+}
+.visitor-wall-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ffffff26;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.visitor-wall-author {
+  font-size: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.visitor-wall-author time {
+  display: block;
+  color: #ffffff80;
+  font-size: 12px;
+  font-weight: 400;
+  margin-top: 2px;
+}
+.visitor-wall-remove {
+  margin-left: auto;
+  font-size: 11px;
+  color: #ffffff99;
+}
+.visitor-wall-remove:hover {
+  color: white;
+}
+.visitor-wall-more {
+  display: block;
+  margin: 24px auto;
+  padding: 10px 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-muted);
+}
+@keyframes wall-pin-glow {
+  50% {
+    opacity: 0.6;
+    transform: scale(1.08);
+  }
+}
+@media (max-width: 639px) {
+  .visitor-wall {
+    padding: 64px 16px 80px;
+  }
+  .visitor-wall-header h1 {
+    font-size: 42px;
+    line-height: 1.15;
+    max-width: 340px;
+    margin-inline: auto;
+  }
+  .visitor-wall-eyebrow {
+    font-size: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .visitor-wall-pin-wrap::before {
+    animation: none;
+  }
+  .visitor-wall-note,
+  .visitor-wall-pin {
+    transition: none;
+  }
+}
+
+.wall-pin-columns {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
+}
+.wall-pin-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+.wall-pin-columns > .wall-pin-column {
+  flex: 1;
+  max-width: calc((100% - 40px) / 3);
+}
+.wall-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 20px;
+}
+.wall-skeleton-card {
+  border-radius: 16px;
+  background: linear-gradient(
+    90deg,
+    var(--color-card) 25%,
+    var(--color-card-soft) 50%,
+    var(--color-card) 75%
+  );
+  background-size: 200% 100%;
+  animation: wall-shimmer 1.5s ease-in-out infinite;
+}
+@keyframes wall-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (max-width: 1023px) {
+  .wall-pin-columns > .wall-pin-column {
+    max-width: calc((100% - 20px) / 2);
+  }
+  .wall-skeleton-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 639px) {
+  .wall-pin-columns > .wall-pin-column {
+    max-width: 100%;
+  }
+  .wall-skeleton-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wall-skeleton-card {
+    animation: none;
+  }
+}

@@ -139,7 +139,7 @@ function ProfileEntry({ p, index }: { p: Profile; index: number }) {
           className="grid h-9 w-9 place-items-center rounded-full transition-transform duration-300 group-hover/exp:scale-105"
           style={{
             backgroundColor: p.accent,
-            boxShadow: `0 0 0 3px #08080a, 0 0 20px 4px ${p.accent}40`,
+            boxShadow: `0 0 0 3px var(--color-background), 0 0 20px 4px ${p.accent}40`,
           }}
         >
           <Icon className="h-4 w-4 text-white" aria-hidden />
