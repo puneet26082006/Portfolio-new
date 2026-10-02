@@ -66,15 +66,26 @@ npm run lint
 npm run typecheck
 npm test
 npm run build
+npm run check:seo
 npm run preview
 ```
 
 The build writes `out/`. Preview serves it at `http://localhost:3001` (override with `PORT`). `npm start` is an alias for this local preview; no Next.js server is needed in production.
 
-Vercel and Netlify configurations are included. Import this GitHub repository, set the four public environment variables in the host dashboard **before building**, and deploy. The build command is `npm run build`; publish directory is `out`. Other static hosts can publish the same directory, serve directory `index.html` files, and use `404.html` for missing pages. Do not rewrite every URL to the home page.
+Vercel and Netlify configurations are included. Import this GitHub repository, set the four public application variables and `SITE_URL` in the host dashboard **before building**, and deploy. The build command is `npm run build`; publish directory is `out`. Other static hosts can publish the same directory, serve directory `index.html` files, and use `404.html` for missing pages. Do not rewrite every URL to the home page.
 
 For a custom domain, add `https://your-domain/wall/` to Supabase's allowed redirect URLs and configure the production Site URL. Set the domain in Formspree if using domain restrictions. Rebuild whenever a public environment setting changes. `.env.local`, dependencies, caches, and build output are excluded from Git.
 
 ## Updating content
 
 Edit the relevant data file and rebuild. Update Medium metadata when publishing new articles. Replace the PDF in `public/` when the resume changes. The current resume uses embedded Times New Roman, selectable text, and a single-column layout; tailor its wording to the job rather than relying on a universal ATS score. Project phone images are illustrative interface concepts.
+
+## Search and production setup
+
+Production domain: https://puneet-saxena-portfolio.vercel.app/
+
+`SITE_URL` controls canonical links, sitemap URLs, social previews, and structured data. Set it to the final HTTPS origin before building. Without a public origin, or on Vercel preview deployments, indexing is disabled. Optional `GOOGLE_SITE_VERIFICATION` and `BING_SITE_VERIFICATION` values add ownership-verification meta tags; these are public codes, not account credentials.
+
+Each page has its own title, description, canonical address, and social metadata. The home page describes the portfolio owner with Person/ProfilePage structured data. Project and article pages add breadcrumbs and content information. `robots.txt` and `sitemap.xml` are generated during the static build. `npm run check:seo` verifies the exported HTML rather than relying on JavaScript to inject metadata.
+
+See [production launch and search setup](docs/PRODUCTION_SETUP.md) for exact Supabase, Google, GitHub, Formspree, and Search Console settings. `VERCEL_TOKEN` is only for local deployment administration; never add it to browser code, public variables, or the deployed application's environment.

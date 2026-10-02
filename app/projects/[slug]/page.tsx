@@ -1,3 +1,5 @@
+import { pageMetadata, breadcrumbs, absoluteUrl } from "@/lib/seo";
+import { StructuredData } from "@/components/structured-data";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProjectDetail } from "@/components/project-detail";
@@ -11,7 +13,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const project = getProject(slug);
   return project
-    ? { title: project.title, description: project.summary }
+    ? pageMetadata(project.title, project.summary, `/projects/${slug}/`)
     : { title: "Project not found" };
 }
 export default async function ProjectPage({
@@ -20,5 +22,9 @@ export default async function ProjectPage({
   const { slug } = await params;
   const project = getProject(slug);
   if (!project) notFound();
-  return <ProjectDetail project={project} />;
+  return <>
+    <StructuredData data={breadcrumbs([{ name: "Home", path: "/" }, { name: "Projects", path: "/projects/" }, { name: project.title, path: `/projects/${slug}/` }])} />
+    <StructuredData data={{ "@context": "https://schema.org", "@type": "CreativeWork", name: project.title, description: project.summary, url: absoluteUrl(`/projects/${slug}/`), author: { "@id": absoluteUrl("/#person") }, keywords: project.tags.join(", "), inLanguage: "en" }} />
+    <ProjectDetail project={project} />
+  </>;
 }

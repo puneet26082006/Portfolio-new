@@ -49,6 +49,7 @@ next-env.d.ts
 
 # Local tooling and intermediate files
 /.openai/
+/.netlify/
 /AGENTS.md
 /CLAUDE.md
 /tmp/

@@ -1,10 +1,6 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { ContactPageContent } from "@/components/contact-page-content";
-export const metadata: Metadata = {
-  title: "Let's Connect",
-  description:
-    "Contact Puneet Saxena for internships, projects, and collaborations.",
-};
+export const metadata = pageMetadata("Contact", "Contact Puneet Saxena for internships, projects, and collaborations.", "/contact/");
 export default function ContactPage() {
   return <ContactPageContent />;
 }

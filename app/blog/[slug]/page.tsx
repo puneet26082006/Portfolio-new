@@ -1,3 +1,5 @@
+import { pageMetadata, breadcrumbs, absoluteUrl, SOCIAL_IMAGE } from "@/lib/seo";
+import { StructuredData } from "@/components/structured-data";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -13,7 +15,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = getPost(slug);
   if (!post) return { title: "Article not found" };
-  return { title: post.title, description: post.excerpt };
+  return pageMetadata(post.title, post.excerpt, `/blog/${slug}/`, true);
 }
 
 export default async function ArticlePage({
@@ -25,6 +27,8 @@ export default async function ArticlePage({
 
   return (
     <main className="min-h-screen pb-28 pt-36 md:pt-44">
+      <StructuredData data={breadcrumbs([{ name: "Home", path: "/" }, { name: "Blog", path: "/blog/" }, { name: post.title, path: `/blog/${slug}/` }])} />
+      <StructuredData data={{ "@context": "https://schema.org", "@type": "BlogPosting", headline: post.title, description: post.excerpt, url: absoluteUrl(`/blog/${slug}/`), mainEntityOfPage: absoluteUrl(`/blog/${slug}/`), author: { "@type": "Person", "@id": absoluteUrl("/#person"), name: "Puneet Saxena", url: absoluteUrl() }, image: absoluteUrl(SOCIAL_IMAGE.url), inLanguage: "en" }} />
       <article className="mx-auto max-w-4xl px-6">
         <Link
           href="/blog"

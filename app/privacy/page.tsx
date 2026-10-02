@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import {
   FiDatabase,
   FiShield,
@@ -15,11 +15,7 @@ import {
   LegalContact,
 } from "@/components/legal-page";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description:
-    "How Puneet Saxena's portfolio handles wall accounts, public pins, contact messages, and browser storage.",
-};
+export const metadata = pageMetadata("Privacy Policy", "How Puneet Saxena's portfolio handles wall accounts, public pins, contact messages, and browser storage.", "/privacy/");
 export default function PrivacyPage() {
   return (
     <LegalPage

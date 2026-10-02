@@ -9,6 +9,8 @@ import "./legal-pages.css";
 import "./theme.css";
 import "./blog.css";
 import "./context-menu.css";
+import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION, SOCIAL_IMAGE, INDEXABLE, identitySchema } from "@/lib/seo";
+import { StructuredData } from "@/components/structured-data";
 import { ContextMenu } from "@/components/context-menu";
 import { Nav } from "../components/nav";
 import { ScrollBlur } from "../components/scroll-blur";
@@ -38,38 +40,23 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: {
-    default: "Puneet Saxena — Competitive Programmer & Full-Stack Developer",
-    template: "%s | Puneet Saxena",
+  metadataBase: new URL(SITE_URL),
+  title: { default: SITE_TITLE, template: "%s | Puneet Saxena" },
+  description: SITE_DESCRIPTION,
+  applicationName: "Puneet Saxena Portfolio",
+  authors: [{ name: "Puneet Saxena", url: SITE_URL }],
+  creator: "Puneet Saxena",
+  category: "technology",
+  robots: INDEXABLE
+    ? { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } }
+    : { index: false, follow: false },
+  verification: { google: process.env.GOOGLE_SITE_VERIFICATION || undefined, other: process.env.BING_SITE_VERIFICATION ? { "msvalidate.01": process.env.BING_SITE_VERIFICATION } : undefined },
+  openGraph: { title: SITE_TITLE, description: SITE_DESCRIPTION, siteName: "Puneet Saxena Portfolio", type: "website", locale: "en_IN", images: [SOCIAL_IMAGE] },
+  twitter: { card: "summary_large_image", title: SITE_TITLE, description: SITE_DESCRIPTION, images: [SOCIAL_IMAGE] },
+  icons: {
+    icon: [ { url: "/favicon.ico?v=ps-1", sizes: "16x16 32x32 48x48 64x64" }, { url: "/icon.svg?v=ps-1", type: "image/svg+xml", sizes: "any" } ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
-  description:
-    "Portfolio of Puneet Saxena — Codeforces Pupil, CodeChef 3★ competitive programmer, full-stack developer, and AI product builder based in Jaipur, India.",
-  keywords: [
-    "Puneet Saxena",
-    "Competitive Programmer",
-    "Full-Stack Developer",
-    "Codeforces",
-    "CodeChef",
-    "React",
-    "Node.js",
-    "TypeScript",
-    "AI Developer",
-  ],
-  authors: [{ name: "Puneet Saxena" }],
-  openGraph: {
-    title: "Puneet Saxena — Competitive Programmer & Full-Stack Developer",
-    description:
-      "Codeforces Pupil, CodeChef 3★, and full-stack developer building useful web, AI, and optimization products.",
-    type: "website",
-    locale: "en_US",
-  },
-  twitter: {
-    card: "summary",
-    title: "Puneet Saxena — Portfolio",
-    description:
-      "Competitive Programmer & Full-Stack Developer building scalable web & AI products.",
-  },
-  icons: { icon: "/icon.svg" },
 };
 
 export default function RootLayout({
@@ -91,6 +78,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-background text-foreground">
+        <StructuredData data={identitySchema} />
         <LenisProvider>
           <ScrollBlur />
           <Nav />

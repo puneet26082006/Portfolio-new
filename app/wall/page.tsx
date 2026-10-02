@@ -1,11 +1,7 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { WallExperience } from "@/components/wall-experience";
 
-export const metadata: Metadata = {
-  title: "The Wall",
-  description:
-    "Sign in with Google or GitHub to leave a note or doodle on Puneet's visitor wall.",
-};
+export const metadata = pageMetadata("Visitor Wall", "Sign in with Google or GitHub to leave a note or doodle on Puneet's visitor wall.", "/wall/");
 
 export default function WallPage() {
   return (

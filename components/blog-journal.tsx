@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { FiArrowUpRight, FiClock, FiRss, FiSearch, FiX } from "react-icons/fi";
 import { PageIntro } from "./page-intro";
@@ -73,7 +73,7 @@ function ArticleCard({
   );
 }
 
-export function BlogJournal() {
+export function BlogJournal({ children }: { children?: ReactNode }) {
   const [topic, setTopic] = useState("All Posts");
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
@@ -188,6 +188,7 @@ export function BlogJournal() {
             </div>
           )}
         </motion.div>
+        {children}
         <div className="journal-medium">
           <p>More experiments. More lessons. Always learning.</p>
           <a href={MEDIUM_PROFILE} target="_blank" rel="noopener noreferrer">

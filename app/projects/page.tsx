@@ -1,12 +1,8 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { GalleryHeading } from "@/components/gallery-heading";
 import { ProjectCard } from "@/components/project-card";
 import { PROJECT_CATALOG } from "@/lib/project-catalog";
-export const metadata: Metadata = {
-  title: "Projects Gallery",
-  description:
-    "Explore Puneet Saxena's web applications, AI products, and optimization projects.",
-};
+export const metadata = pageMetadata("Projects", "Explore Puneet Saxena's web applications, AI products, and optimization projects.", "/projects/");
 export default function ProjectsPage() {
   return (
     <main className="project-gallery-page">

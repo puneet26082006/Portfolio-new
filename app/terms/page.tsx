@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import {
   FiCheckCircle,
@@ -11,11 +11,7 @@ import {
 } from "react-icons/fi";
 import { LegalPage, LegalCard, LegalContact } from "@/components/legal-page";
 
-export const metadata: Metadata = {
-  title: "Terms of Use",
-  description:
-    "Terms for using Puneet Saxena's portfolio, project demos, contact form, and public visitor wall.",
-};
+export const metadata = pageMetadata("Terms of Use", "Terms for using Puneet Saxena's portfolio, project demos, contact form, and public visitor wall.", "/terms/");
 export default function TermsPage() {
   return (
     <LegalPage
