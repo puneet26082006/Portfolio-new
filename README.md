@@ -4,7 +4,7 @@ A responsive portfolio built with Next.js 16, React 19, TypeScript, and Tailwind
 
 ## Run locally
 
-Use Node.js 22.6 or later (Node 22 LTS recommended).
+Use Node.js 22 LTS (22.6 or later within the 22.x release line).
 
 ```sh
 npm ci
